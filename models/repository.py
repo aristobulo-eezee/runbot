@@ -3,9 +3,21 @@ from openerp import models, fields, api, _
 
 
 class Repository(models.Model):
-    _name = 'runbot.repository'
+    _name = 'runbot.repo'
 
     # Fields
     active = fields.Boolean('Active', default=True)
+    alias = fields.Char('Alias')
     name = fields.Char('Repository', required=True)
     published = fields.Boolean('Available on website', default=False)
+    git_host = fields.Selection([
+        ('local', _('Local')), ], string='Hosting', required=True,
+        default='local',
+        help='Provider where git repository is hosted. Local means git '
+             'repository is located on the same filesystem as runbot.')
+    branch_ids = fields.One2many('runbot.branch', 'repo_id', string='Branches')
+    sticky_branch_ids = fields.many2many()
+
+    @api.multi
+    def update_branches(self):
+        pass
