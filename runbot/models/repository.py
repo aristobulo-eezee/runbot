@@ -97,7 +97,8 @@ class Repository(models.Model):
                 values = {
                     'repo_id': self.id,
                     'name': head[0][len('origin/'):],
-                    'ref_name': head[1],
+                    'ref_name': head[1].replace('refs/remotes/origin/',
+                                                'refs/heads/'),
                 }
                 self.env['runbot.branch'].create(values)
 

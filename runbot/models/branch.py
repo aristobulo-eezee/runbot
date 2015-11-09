@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-from openerp import models, fields
+from openerp import models, fields, api
 
 
 class Branch(models.Model):
