@@ -27,10 +27,26 @@ class Repository(models.Model):
         'runbot.branch', string='Sticky branches', copy=False)
     tag_ids = fields.One2many('runbot.repo.tag', 'repo_id', string='Tags')
 
+    _sql_constraints = [
+        ('unq_name', 'unique(name)', 'Repository must be unique!'), ]
+
     @api.model
     def root(self):
         return os.path.join(os.path.dirname(openerp.addons.runbot.__file__),
                             'static/repo/')
+
+    @api.multi
+    def get_plain_name(self):
+        self.ensure_one()
+        name = self.name
+        for i in './@:':
+            name = name.replace(i, '_')
+        return name
+
+    @api.multi
+    def get_dir(self):
+        self.ensure_one()
+        return '%s%s' % (self.root(), self.get_plain_name())
 
     @api.model
     def create(self, values):
@@ -50,10 +66,10 @@ class Repository(models.Model):
         try:
             if not branch:
                 repo = Repo.clone_from(
-                    self.name, self.root(), depth=1, no_single_branch=True)
+                    self.name, self.get_dir(), depth=1, no_single_branch=True)
             else:
                 repo = Repo.clone_from(
-                    self.name, self.root(), depth=1, branch=branch)
+                    self.name, self.get_dir(), depth=1, branch=branch)
             heads = []
             tags = []
             for ref in repo.references:
@@ -64,7 +80,7 @@ class Repository(models.Model):
             self.update_branches(heads=heads)
             self.update_tags(tags=tags)
         except Exception as e:
-            Warning(e)
+            raise Warning(e)
 
     @api.multi
     def update_branches(self, heads=[]):
