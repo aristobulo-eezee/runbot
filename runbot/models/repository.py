@@ -1,8 +1,10 @@
 # -*- encoding: utf-8 -*-
+import openerp
 from openerp import models, fields, api, _
 from openerp.exceptions import Warning
 
 from git import Repo, RemoteReference, TagReference
+import os
 
 
 class Repository(models.Model):
@@ -26,6 +28,11 @@ class Repository(models.Model):
     tag_ids = fields.One2many('runbot.repo.tag', 'repo_id', string='Tags')
 
     @api.model
+    def root(self):
+        return os.path.join(os.path.dirname(openerp.addons.runbot.__file__),
+                            'static/repo/')
+
+    @api.model
     def create(self, values):
         res = super(Repository, self).create(values)
         res.clone()
@@ -43,12 +50,10 @@ class Repository(models.Model):
         try:
             if not branch:
                 repo = Repo.clone_from(
-                    self.name, '/tmp/runbot_%s' % fields.Datetime.now(),
-                    depth=1, no_single_branch=True)
+                    self.name, self.root(), depth=1, no_single_branch=True)
             else:
                 repo = Repo.clone_from(
-                    self.name, '/tmp/runbot_%s' % fields.Datetime.now(),
-                    depth=1, branch=branch)
+                    self.name, self.root(), depth=1, branch=branch)
             heads = []
             tags = []
             for ref in repo.references:
