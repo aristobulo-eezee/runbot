@@ -14,16 +14,12 @@ flake8:
   script:
   - flake8 --config=flake8.cfg .
 
-requirements:
-  stage: check
-  script:
-  - pip install -r requirements.txt
-
 tests:
   stage: build
   script:
   - virtualenv env
   - source env/bin/activate
+  - pip install -r requirements.txt
   - git clone --depth=1 --branch=$ODOO_VERSION https://github.com/eezee-it/odoo.git env/odoo
   - rm -rf env/odoo/.git
   - pip install -q -r env/odoo/requirements.txt
