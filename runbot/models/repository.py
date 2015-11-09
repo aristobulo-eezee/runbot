@@ -26,4 +26,5 @@ class Repository(models.Model):
 
     @api.multi
     def repo_publish_button(self):
-        self.write({'published': True})
+        for repo in self:
+            repo.published = not repo.published
