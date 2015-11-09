@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <menuitem id="menu_runbot_top" name="Runbot" icon="fa-cogs"/>
+        <menuitem id="menu_runbot" name="Runbot" parent="menu_runbot_top"/>
+    </data>
+</openerp>

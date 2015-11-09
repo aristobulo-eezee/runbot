@@ -21,7 +21,10 @@ Tests will run on a CI software of you choice (Travis-ci, Gitlab-ci,
 Drone, etc.)
 """,
     'depends': ['website'],
-    'data': [],
+    'data': [
+        'views/runbot_view.xml',
+        'views/repo_view.xml',
+    ],
     'demo': [],
     'installable': True,
     'application': False,

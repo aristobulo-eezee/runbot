@@ -3,7 +3,7 @@ from openerp import models, fields
 
 
 class Branch(models.Model):
-    _name = 'repo.branch'
+    _name = 'runbot.branch'
 
     # Fields
     repo_id = fields.Many2one('runbot.repo', string='Repository',

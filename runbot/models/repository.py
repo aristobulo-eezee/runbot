@@ -16,7 +16,9 @@ class Repository(models.Model):
         help='Provider where git repository is hosted. Local means git '
              'repository is located on the same filesystem as runbot.')
     branch_ids = fields.One2many('runbot.branch', 'repo_id', string='Branches')
-    sticky_branch_ids = fields.many2many()
+    sticky_branch_ids = fields.Many2many(
+        'runbot.branch', 'rel_repo_sticky_branch', 'repo_id', 'branch_id',
+        string='Sticky branches')
 
     @api.multi
     def update_branches(self):
