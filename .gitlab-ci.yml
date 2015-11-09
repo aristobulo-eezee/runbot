@@ -1,0 +1,34 @@
+variables:
+  PROJECT_MODULES: "runbot"
+  ODOO_VERSION: "9.0"
+
+before_script:
+  - dropdb --if-exists $CI_BUILD_REF
+
+stages:
+  - check
+  - build
+  - clean
+
+flake8:
+  stage: check
+  script:
+  - flake8 --config=flake8.cfg .
+
+tests:
+  stage: build
+  script:
+  - virtualenv env
+  - source env/bin/activate
+  - git clone --depth=1 --branch=$ODOO_VERSION https://github.com/eezee-it/odoo.git env/odoo
+  - rm -rf env/odoo/.git
+  - pip install -q -r env/odoo/requirements.txt
+  - createdb --encoding=UTF8 --locale=en_US.UTF-8 --template=template0 $CI_BUILD_REF
+  - ./env/odoo/odoo.py -d $CI_BUILD_REF --addons-path=./env/odoo/addons/,./ --log-level=warn --stop-after-init
+  - ./env/odoo/odoo.py -d $CI_BUILD_REF --addons-path=./env/odoo/addons/,./ -i $PROJECT_MODULES --without-demo=all --log-level=warn --stop-after-init
+  - ./env/odoo/odoo.py -d $CI_BUILD_REF --addons-path=./env/odoo/addons/,./ -i $PROJECT_MODULES --test-enable --log-level=test --stop-after-init
+
+finish:
+  stage: clean
+  script:
+  - dropdb --if-exists $CI_BUILD_REF
