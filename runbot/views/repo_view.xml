@@ -23,16 +23,27 @@
                         </group>
                         <group string="Sticky branches">
                             <field name="sticky_branch_ids" widget="many2many_tags"
-                                   nolabel="1" options="{'no_quick_create': True, 'no_create': True}"/>
+                                   nolabel="1"
+                                   options="{'no_quick_create': True, 'no_create': True}"
+                                   domain="[('repo_id', '=', id)]"/>
                         </group>
-                        <group string="Branches">
-                            <field name="branch_ids" nolabel="1">
-                                <tree edit="false" create="false" delete="false">
-                                    <field name="name" />
-                                    <field name="ref_name" />
-                                </tree>
-                            </field>
-                        </group>
+                        <notebook>
+                            <page string="Branches">
+                                <field name="branch_ids" nolabel="1">
+                                    <tree edit="false" create="false" delete="false">
+                                        <field name="name" />
+                                        <field name="ref_name" />
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Tags">
+                                <field name="tag_ids" nolabel="1">
+                                    <tree edit="false" delete="false" create="false">
+                                        <field name="name"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
                     </sheet>
                 </form>
             </field>
