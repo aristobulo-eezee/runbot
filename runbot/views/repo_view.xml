@@ -6,11 +6,32 @@
             <field name="arch" type="xml">
                 <form string="Repository">
                     <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button class="oe_stat_button" name="repo_publish_button"
+                                type="object" icon="fa-globe">
+                                <field name="published" widget="website_button"/>
+                            </button>
+                        </div>
                         <div class="oe_title">
                             <label for="name" class="oe_edit_only"/>
                             <h1><field name="name" class="oe_inline"/></h1>
                         </div>
-                        <group>
+                        <group string="Configuration">
+                            <field name="active"/>
+                            <field name="alias"/>
+                            <field name="git_host"/>
+                        </group>
+                        <group string="Sticky branches">
+                            <field name="sticky_branch_ids" widget="many2many_tags"
+                                   nolabel="1" options="{'no_quick_create': True, 'no_create': True}"/>
+                        </group>
+                        <group string="Branches">
+                            <field name="branch_ids" nolabel="1">
+                                <tree edit="false" create="false" delete="false">
+                                    <field name="name" />
+                                    <field name="ref_name" />
+                                </tree>
+                            </field>
                         </group>
                     </sheet>
                 </form>

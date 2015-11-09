@@ -23,3 +23,7 @@ class Repository(models.Model):
     @api.multi
     def update_branches(self):
         pass
+
+    @api.multi
+    def repo_publish_button(self):
+        self.write({'published': True})
