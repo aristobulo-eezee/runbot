@@ -4,7 +4,6 @@ variables:
 
 before_script:
   - dropdb --if-exists $CI_BUILD_REF
-
 stages:
   - check
   - build
@@ -14,6 +13,11 @@ flake8:
   stage: check
   script:
   - flake8 --config=flake8.cfg .
+
+requirements:
+  stage: check
+  script:
+  - pip install -r requirements.txt
 
 tests:
   stage: build
