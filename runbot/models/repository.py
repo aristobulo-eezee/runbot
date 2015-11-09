@@ -11,8 +11,9 @@ class Repository(models.Model):
     name = fields.Char('Repository', required=True)
     published = fields.Boolean('Available on website', default=False)
     git_host = fields.Selection([
-        ('local', _('Local')), ], string='Hosting', required=True,
-        default='local',
+        ('local', _('Local')),
+        ('github', _('Github')), ], string='Hosting', required=True,
+        default='github',
         help='Provider where git repository is hosted. Local means git '
              'repository is located on the same filesystem as runbot.')
     branch_ids = fields.One2many('runbot.branch', 'repo_id', string='Branches')
