@@ -5,7 +5,8 @@ from openerp.exceptions import Warning, ValidationError
 
 import os
 import uuid
-from git import Repo, RemoteReference, TagReference
+import shutil
+from git import Repo, RemoteReference, TagReference, Head
 
 
 class Repository(models.Model):
@@ -64,13 +65,20 @@ class Repository(models.Model):
     @api.multi
     def get_dir(self):
         self.ensure_one()
-        return '%s/repo/%s' % (self.root(), self.get_plain_name())
+        return '%srepo/%s' % (self.root(), self.get_plain_name())
 
     @api.model
     def create(self, values):
         res = super(Repository, self).create(values)
         res.clone()
         return res
+
+    def unlink(self, cr, uid, ids, context=None):
+        repos = self.browse(cr, uid, ids, context=context)
+        for repo in repos:
+            if os.path.exists(repo.get_dir()):
+                shutil.rmtree(repo.get_dir(), ignore_errors=True)
+        return super(Repository, self).unlink(cr, uid, ids, context=context)
 
     @api.multi
     def clone(self, branch=None, to_path=None):
@@ -95,7 +103,7 @@ class Repository(models.Model):
             heads = []
             tags = []
             for ref in repo.references:
-                if isinstance(ref, RemoteReference):
+                if isinstance(ref, (RemoteReference, Head)):
                     heads.append((ref.name, ref.path))
                 elif isinstance(ref, TagReference):
                     tags.append(ref.name)
@@ -118,7 +126,7 @@ class Repository(models.Model):
             if 'origin/HEAD' not in head[1] and head[0] not in branches:
                 values = {
                     'repo_id': self.id,
-                    'name': head[0][len('origin/'):],
+                    'name': head[0],
                     'ref_name': head[1].replace('refs/remotes/origin/',
                                                 'refs/heads/'),
                 }

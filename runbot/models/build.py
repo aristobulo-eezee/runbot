@@ -25,7 +25,7 @@ class Build(models.Model):
     last_state_since = fields.Datetime(
         string='Since', default=fields.Datetime.now())
     branch_id = fields.Many2one(
-        'runbot.branch', string='Branch', required=True)
+        'runbot.branch', string='Branch', required=True, ondelete='cascade')
     repo_id = fields.Many2one(
         'runbot.repo', string='Repository', related='branch_id.repo_id',
         store=True)
