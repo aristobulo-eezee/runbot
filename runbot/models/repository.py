@@ -3,8 +3,9 @@ import openerp
 from openerp import models, fields, api, _
 from openerp.exceptions import Warning
 
-from git import Repo, RemoteReference, TagReference
 import os
+import uuid
+from git import Repo, RemoteReference, TagReference
 
 
 class Repository(models.Model):
@@ -26,6 +27,11 @@ class Repository(models.Model):
     sticky_branch_ids = fields.Many2many(
         'runbot.branch', string='Sticky branches', copy=False)
     tag_ids = fields.One2many('runbot.repo.tag', 'repo_id', string='Tags')
+    token = fields.Char(
+        string='Auth Token', default=lambda self: uuid.uuid4().hex,
+        help='Use this token in your webhooks to authenticate.'
+             'Example: http://example.com/runbot/webhook/push?'
+             'token=8c05904f0051419283d1024fc5ce1a59')
 
     _sql_constraints = [
         ('unq_name', 'unique(name)', 'Repository must be unique!'), ]

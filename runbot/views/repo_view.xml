@@ -20,6 +20,7 @@
                             <field name="active"/>
                             <field name="alias"/>
                             <field name="git_host"/>
+                            <field name="token" readonly="1"/>
                         </group>
                         <group string="Sticky branches">
                             <field name="sticky_branch_ids" widget="many2many_tags"
