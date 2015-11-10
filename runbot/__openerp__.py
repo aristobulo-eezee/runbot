@@ -24,6 +24,7 @@ Drone, etc.)
     'data': [
         'views/runbot_view.xml',
         'views/repo_view.xml',
+        'views/build_view.xml',
     ],
     'demo': [],
     'installable': True,

@@ -103,7 +103,8 @@ class Build(models.Model):
         _logger.info('Starting odoo server.')
         odoo_server = subprocess.Popen([
             '%s/bin/python' % env_dir, '%s/openerp-server' % odoo_dir,
-            '-r', 'odoo', '--addons-path=%s/addons,%s' % (odoo_dir, custom_dir),
+            '-r', 'odoo',
+            '--addons-path=%s/addons,%s' % (odoo_dir, custom_dir),
             '--xmlrpc-port=%s' % odoo_port, '--longpolling-port=%s' % lp_port],
             env=venv)
         self.write({
@@ -130,3 +131,12 @@ class Build(models.Model):
         """
         self.ensure_one()
         return
+
+    def unlink(self, cr, uid, ids, context=None):
+        builds = self.browse(cr, uid, ids, context=context)
+        for build in builds:
+            build_path = '%sbuild/%s-%s' % (
+                build.repo_id.root(), build.branch_id.name, build.commit)
+            if os.path.exists(build_path):
+                shutil.rmtree(build_path, ignore_errors=True)
+        return super(Build, self).unlink(cr, uid, ids, context=context)
