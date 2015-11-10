@@ -19,19 +19,19 @@ class RunbotController(http.Controller):
         repo = json_dict['repository']['url']
         commit = json_dict['commits'][0]
         # Verify token before continue
-        repo = env['runbot.repo'].sudo().search([
+        repository = env['runbot.repo'].sudo().search([
             ('name', '=', repo), ('token', '=', token)], limit=1)
-        if not repo:
+        if not repository:
             _logger.info('Received wrong token for repo: %s' % repo)
             return
         build = env['runbot.build'].sudo().search([
-            ('repo_id.id', '=', repo.id),
+            ('repo_id.id', '=', repository.id),
             ('branch_id.ref_name', '=', ref),
             ('commit', '=', commit['id'])], limit=1)
         if not build:
             branch = env['runbot.branch'].sudo().search([
                 ('ref_name', '=', ref),
-                ('repo_id', '=', repo and repo.id)], limit=1)
+                ('repo_id', '=', repository and repository.id)], limit=1)
             build = env['runbot.build'].sudo().create({
                 'commit': commit['id'],
                 'branch_id': branch.id,
