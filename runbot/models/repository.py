@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 import openerp
 from openerp import models, fields, api, _
-from openerp.exceptions import Warning
+from openerp.exceptions import Warning, ValidationError
 
 import os
 import uuid
@@ -13,6 +13,7 @@ class Repository(models.Model):
 
     # Fields
     active = fields.Boolean('Active', default=True)
+    odoo_repo = fields.Boolean('Default Odoo repository', default=False)
     alias = fields.Char('Alias')
     name = fields.Char('Repository', required=True)
     published = fields.Boolean('Available on website', default=False,
@@ -34,12 +35,23 @@ class Repository(models.Model):
              'token=8c05904f0051419283d1024fc5ce1a59')
 
     _sql_constraints = [
-        ('unq_name', 'unique(name)', 'Repository must be unique!'), ]
+        ('unq_name', 'unique(name)', 'Repository must be unique!'),
+    ]
+
+    @api.multi
+    @api.constrains('odoo_repo')
+    def _check_description(self):
+        self.ensure_one()
+        count = self.env['runbot.repo'].search_count([
+            ('odoo_repo', '=', True)])
+        if count > 1:
+            raise ValidationError("Can\'t have more than one default odoo "
+                                  "repository")
 
     @api.model
     def root(self):
         return os.path.join(os.path.dirname(openerp.addons.runbot.__file__),
-                            'static/repo/')
+                            'static/')
 
     @api.multi
     def get_plain_name(self):
@@ -52,7 +64,7 @@ class Repository(models.Model):
     @api.multi
     def get_dir(self):
         self.ensure_one()
-        return '%s%s' % (self.root(), self.get_plain_name())
+        return '%s/repo/%s' % (self.root(), self.get_plain_name())
 
     @api.model
     def create(self, values):
@@ -61,21 +73,25 @@ class Repository(models.Model):
         return res
 
     @api.multi
-    def clone(self, branch=None):
+    def clone(self, branch=None, to_path=None):
         """
         Shallow clone a repository, if branch name is specified it will clone
         only that branch
         :param branch: string: branch name
+        :param to_path: string: destination dir
         :return:
         """
         self.ensure_one()
         try:
             if not branch:
+                # Create bare repo
                 repo = Repo.clone_from(
-                    self.name, self.get_dir(), depth=1, no_single_branch=True)
+                    self.name, self.get_dir(), depth=1, no_single_branch=True,
+                    bare=True)
             else:
+                # Get sources from bare repo
                 repo = Repo.clone_from(
-                    self.name, self.get_dir(), depth=1, branch=branch)
+                    self.get_dir(), to_path=to_path, depth=1, branch=branch)
             heads = []
             tags = []
             for ref in repo.references:

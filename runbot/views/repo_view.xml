@@ -18,6 +18,7 @@
                         </div>
                         <group string="Configuration">
                             <field name="active"/>
+                            <field name="odoo_repo"/>
                             <field name="alias"/>
                             <field name="git_host"/>
                             <field name="token" readonly="1"/>
