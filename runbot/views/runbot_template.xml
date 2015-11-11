@@ -77,8 +77,8 @@
                                 <table class="table table-hover">
                                     <tbody>
                                         <tr>
-                                            <th>Name</th>
-                                            <th>Ref name</th>
+                                            <th style="width=50px">Name</th>
+                                            <th style="width=50px">Ref name</th>
                                             <th>Builds</th>
                                         </tr>
                                         <t t-foreach="repo.branch_ids" t-as="branch">

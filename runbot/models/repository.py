@@ -95,39 +95,39 @@ class Repository(models.Model):
         :return:
         """
         self.ensure_one()
-        # try:
-        if not branch:
-            # Create bare repo
-            _logger.info('Cloning bare repo in: %s.' % self.get_dir())
-            repo = Repo.clone_from(
-                self.name, self.get_dir(), bare=True)
-            git = repo.git
-            _logger.info('Fetching %s.' % self.name)
-            git.fetch()
-        else:
-            # Get sources from bare repo
-            bare = Repo(self.get_dir())
-            git = bare.git
-            _logger.info('Fetching %s.' % self.name)
-            git.fetch('origin', '%s:%s' % (branch, branch))
-            _logger.info('Cloning repo: %s to: %s.' % (self.name, to_path))
-            repo = Repo.clone_from(
-                self.get_dir(), to_path=to_path, branch=branch)
-            if commit:
-                repo.commit(commit)
-        heads = []
-        tags = []
-        for ref in repo.references:
-            if isinstance(ref, (RemoteReference, Head)):
-                heads.append((ref.name,
-                              ref.path.replace('refs/remotes/origin/',
-                                               'refs/heads/')))
-            elif isinstance(ref, TagReference):
-                tags.append(ref.name)
-        self.update_branches(heads=heads)
-        self.update_tags(tags=tags)
-        # except Exception as e:
-        #     raise Warning(e)
+        try:
+            if not branch:
+                # Create bare repo
+                _logger.info('Cloning bare repo in: %s.' % self.get_dir())
+                repo = Repo.clone_from(
+                    self.name, self.get_dir(), bare=True)
+                git = repo.git
+                _logger.info('Fetching %s.' % self.name)
+                git.fetch()
+            else:
+                # Get sources from bare repo
+                bare = Repo(self.get_dir())
+                git = bare.git
+                _logger.info('Fetching %s.' % self.name)
+                git.fetch('origin', '%s:%s' % (branch, branch))
+                _logger.info('Cloning repo: %s to: %s.' % (self.name, to_path))
+                repo = Repo.clone_from(
+                    self.get_dir(), to_path=to_path, branch=branch)
+                if commit:
+                    repo.commit(commit)
+            heads = []
+            tags = []
+            for ref in repo.references:
+                if isinstance(ref, (RemoteReference, Head)):
+                    heads.append((ref.name,
+                                  ref.path.replace('refs/remotes/origin/',
+                                                   'refs/heads/')))
+                elif isinstance(ref, TagReference):
+                    tags.append(ref.name)
+            self.update_branches(heads=heads)
+            self.update_tags(tags=tags)
+        except Exception as e:
+            raise Warning(e)
 
     @api.multi
     def update_branches(self, heads=[]):
