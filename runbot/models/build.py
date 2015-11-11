@@ -98,18 +98,15 @@ class Build(models.Model):
         cmd = [
             '%s/bin/python' % self.env_dir,
             '%s/openerp-server' % self.odoo_dir,
-            '-d', self.short_name,
             '--db-filter', '%s.*$' % self.short_name,
             '--addons-path=%s/addons,%s' % (self.odoo_dir, self.custom_dir),
             '--xmlrpc-port=%s' % odoo_port, '--longpolling-port=%s' % lp_port,
-            '--logfile', '../logs/%s.log' % self.short_name]
+            '--logfile', '../logs/%s.log' % self.short_name,
+            '-d', self.short_name,
+            '-i', '%s' % ','.join(runbot_cfg['addons']['install'])]
 
         if runbot_cfg.get('tests', False):
             cmd.append('--test-enabled')
-        if runbot_cfg.get('addons'):
-            install = runbot_cfg['addons'].get('install', ['base', 'web'])
-            cmd.append('-i')
-            cmd.append('%s' % ','.join(install))
 
         odoo_server = subprocess.Popen(cmd, env=venv)
         # Check if process is running

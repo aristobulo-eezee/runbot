@@ -10,3 +10,4 @@ class Branch(models.Model):
                               required=True, ondelete='cascade')
     name = fields.Char('Branch', required=True)
     ref_name = fields.Char('Ref name', required=True)
+    build_ids = fields.One2many('runbot.build', 'branch_id', string='Builds')
