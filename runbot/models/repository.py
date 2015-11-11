@@ -95,7 +95,7 @@ class Repository(models.Model):
             if not branch:
                 # Create bare repo
                 repo = Repo.clone_from(
-                    self.name, self.get_dir(), depth=1, no_single_branch=True,
+                    self.name, self.get_dir(), no_single_branch=True,
                     bare=True)
                 git = repo.git
                 git.fetch()
@@ -105,7 +105,7 @@ class Repository(models.Model):
                 git = bare.git
                 git.fetch()
                 repo = Repo.clone_from(
-                    self.get_dir(), to_path=to_path, depth=1, branch=branch)
+                    self.get_dir(), to_path=to_path, branch=branch)
                 if commit:
                     repo.commit(commit)
             heads = []

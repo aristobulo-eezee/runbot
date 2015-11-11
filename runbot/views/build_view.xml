@@ -6,6 +6,7 @@
             <field name="arch" type="xml">
                 <form string="Build">
                     <header>
+                        <button type="object" name="run" string="Rebuild" states="running,killed,stopped"/>
                         <button type="object" name="start_server" string="Start" states="killed,stopped"/>
                         <button type="object" name="kill" string="Kill" states="running"/>
                         <field name="state" widget="statusbar"

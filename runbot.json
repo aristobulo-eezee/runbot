@@ -1,0 +1,4 @@
+{
+  "odoo": "9.0",
+  "install": ["runbot"]
+}

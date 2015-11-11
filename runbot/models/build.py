@@ -10,6 +10,7 @@ import virtualenv
 import signal
 import psutil
 import datetime
+import json
 
 _logger = logging.getLogger(__name__)
 
@@ -45,14 +46,14 @@ class Build(models.Model):
     @api.depends('commit', 'branch_id', 'branch_id.name', 'repo_id')
     def _compute_dirs(self):
         for build in self:
-            build.env_dir = '%sbuild/%s-%s' % (
-                build.repo_id.root(), build.branch_id.name, build.commit)
+            build.short_name = '%s-%s' % \
+                               (build.commit[:8],
+                                build.branch_id.name.replace('/', '-'))
+            build.env_dir = '%sbuild/%s' % (
+                build.repo_id.root(), build.short_name)
             build.parts_dir = '%s/parts' % build.env_dir
             build.custom_dir = '%s/custom' % build.parts_dir
             build.odoo_dir = '%s/odoo' % build.parts_dir
-            build.short_name = '%s-%s' % \
-                               (build.commit[:8],
-                                build.branch_id.name.replace('/', '-'),)
 
     @api.multi
     def kill(self):
@@ -93,7 +94,6 @@ class Build(models.Model):
         odoo_server = subprocess.Popen([
             '%s/bin/python' % self.env_dir,
             '%s/openerp-server' % self.odoo_dir,
-            '-r', 'odoo',
             '--db-filter', '%s.*$' % self.short_name,
             '--addons-path=%s/addons,%s' % (self.odoo_dir, self.custom_dir),
             '--xmlrpc-port=%s' % odoo_port, '--longpolling-port=%s' % lp_port],
@@ -121,6 +121,7 @@ class Build(models.Model):
             _logger.info('Dropping database %s.' % self.short_name)
             dropdb = subprocess.Popen([
                 'dropdb',
+                '-U', 'odoo',
                 '--if-exists',
                 self.short_name])
             dropdb.wait()
@@ -148,11 +149,12 @@ class Build(models.Model):
         self.repo_id.clone(branch=self.branch_id.name, to_path=self.custom_dir,
                            commit=self.commit)
 
+        runbot_cfg = self.read_json()
+
         _logger.info('Cloning odoo')
         odoo_repo = self.env['runbot.repo'].search([
             ('odoo_repo', '=', True)], limit=1)
-        # TODO: Read runbot.config from repository to set odoo version
-        odoo_repo.clone(branch='8.0', to_path=self.odoo_dir)
+        odoo_repo.clone(branch=runbot_cfg['runbot'], to_path=self.odoo_dir)
 
         _logger.info('Installing odoo dependencies')
         venv = os.environ.copy()
@@ -173,6 +175,7 @@ class Build(models.Model):
         _logger.info('Creating database %s' % self.short_name)
         createdb = subprocess.Popen([
             'createdb', '--encoding=unicode', '--lc-collate=C',
+            '-U', 'odoo',
             '--template=template0', self.short_name], env=venv)
         createdb.wait()
 
@@ -235,3 +238,10 @@ class Build(models.Model):
         res = super(Build, self).create(values)
         self.schedule(res.id)
         return res
+
+    @api.multi
+    def read_json(self):
+        self.ensure_one()
+        with open('runbot.json') as data_file:
+            config = json.load(data_file)
+        return config
