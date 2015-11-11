@@ -82,6 +82,8 @@ class Build(models.Model):
         :return: boolean
         """
         self.ensure_one()
+        runbot_cfg = self.read_json()
+
         if self.pid and psutil.pid_exists(self.pid):
             return False, _('Process is running, please stop before start.')
         venv = os.environ.copy()
@@ -91,13 +93,25 @@ class Build(models.Model):
         lp_port = self.get_open_port()
         _logger.info('Found %s and %s.' % (odoo_port, lp_port))
         _logger.info('Starting odoo server.')
-        odoo_server = subprocess.Popen([
+
+        # Prepare command
+        cmd = [
             '%s/bin/python' % self.env_dir,
             '%s/openerp-server' % self.odoo_dir,
+            '-d', self.short_name,
             '--db-filter', '%s.*$' % self.short_name,
             '--addons-path=%s/addons,%s' % (self.odoo_dir, self.custom_dir),
-            '--xmlrpc-port=%s' % odoo_port, '--longpolling-port=%s' % lp_port],
-            env=venv)
+            '--xmlrpc-port=%s' % odoo_port, '--longpolling-port=%s' % lp_port,
+            '--logfile', '../logs/%s.log' % self.short_name]
+
+        if runbot_cfg.get('tests', False):
+            cmd.append('--test-enabled')
+        if runbot_cfg.get('addons'):
+            install = runbot_cfg['addons'].get('install', ['base', 'web'])
+            cmd.append('-i')
+            cmd.append('%s' % ','.join(install))
+
+        odoo_server = subprocess.Popen(cmd, env=venv)
         # Check if process is running
         state = psutil.pid_exists(odoo_server.pid) and 'running' or 'stopped'
         self.write({
