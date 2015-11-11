@@ -32,8 +32,9 @@ class RunbotController(http.Controller):
             branch = env['runbot.branch'].sudo().search([
                 ('ref_name', '=', ref),
                 ('repo_id', '=', repository and repository.id)], limit=1)
-            build = env['runbot.build'].sudo().create({
+            env['runbot.build'].sudo().create({
                 'commit': commit['id'],
                 'branch_id': branch.id,
             })
-        build.sudo().prepare()
+        else:
+            build.schedule()

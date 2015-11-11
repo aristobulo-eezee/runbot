@@ -12,7 +12,7 @@
                     <sheet>
                         <div class="oe_title">
                             <label for="commit" class="oe_edit_only"/>
-                            <h1><field name="commit" class="oe_inline"/></h1>
+                            <h1><field name="commit" class="oe_inline" readonly="1"/></h1>
                         </div>
                         <group string="Details">
                             <field name="branch_id" readonly="1"/>
@@ -20,6 +20,7 @@
                             <field name="pid" readonly="1"/>
                             <field name="port" readonly="1"/>
                             <field name="lp_port" readonly="1"/>
+                            <field name="env_dir" readonly="1"/>
                         </group>
                     </sheet>
                 </form>
