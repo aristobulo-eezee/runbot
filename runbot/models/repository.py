@@ -109,7 +109,7 @@ class Repository(models.Model):
             bare = Repo(self.get_dir())
             git = bare.git
             _logger.info('Fetching %s.' % self.name)
-            git.fetch('origin', '%s:%s' % branch)
+            git.fetch('origin', '%s:%s' % (branch, branch))
             _logger.info('Cloning repo: %s to: %s.' % (self.name, to_path))
             repo = Repo.clone_from(
                 self.get_dir(), to_path=to_path, branch=branch)
@@ -141,7 +141,7 @@ class Repository(models.Model):
         _logger.info('Updating branches.')
         branches = [b.ref_name for b in self.branch_ids]
         for head in heads:
-            if 'origin/HEAD' not in head[1] and head[1] not in branches:
+            if 'refs/heads/HEAD' not in head[1] and head[1] not in branches:
                 values = {
                     'repo_id': self.id,
                     'name': head[0],

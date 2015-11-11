@@ -154,7 +154,7 @@ class Build(models.Model):
         _logger.info('Cloning odoo')
         odoo_repo = self.env['runbot.repo'].search([
             ('odoo_repo', '=', True)], limit=1)
-        odoo_repo.clone(branch=runbot_cfg['runbot'], to_path=self.odoo_dir)
+        odoo_repo.clone(branch=runbot_cfg['odoo'], to_path=self.odoo_dir)
 
         _logger.info('Installing odoo dependencies')
         venv = os.environ.copy()
@@ -224,7 +224,7 @@ class Build(models.Model):
             'args': '(%s, )' % build_id,
             'user_id': self.env.user.id,
         })
-        _logger.info('Build: %s' % cron.name)
+        _logger.info('Scheduled: %s' % cron.name)
 
     def unlink(self, cr, uid, ids, context=None):
         builds = self.browse(cr, uid, ids, context=context)
@@ -242,6 +242,6 @@ class Build(models.Model):
     @api.multi
     def read_json(self):
         self.ensure_one()
-        with open('runbot.json') as data_file:
+        with open(self.custom_dir+'/runbot.json') as data_file:
             config = json.load(data_file)
         return config
