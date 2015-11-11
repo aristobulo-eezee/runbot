@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <!--Assets-->
+        <template id="runbot.assets" inherit_id="website.assets_frontend">
+            <xpath expr="." position="inside">
+                <link rel="stylesheet" href="/runbot/static/src/css/adminlte.min.css"/>
+                <link rel="stylesheet" href="/runbot/static/lib/ionicons/css/ionicons.min.css"/>
+            </xpath>
+        </template>
+        <!--Runbot homepage-->
+        <template id="runbot.home">
+            <t t-call='website.layout'>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="box">
+                            <div class="box-header">
+                                <h3 class="box-title">Repositories</h3>
+                                <div class="box-tools">
+                                    <div class="input-group input-group-sm" style="width: 150px;">
+                                        <input type="text" name="table_search" class="form-control pull-right" placeholder="Search" />
+
+                                        <div class="input-group-btn">
+                                            <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /.box-header -->
+                            <div class="box-body table-responsive no-padding">
+                                <table class="table table-hover">
+                                    <tbody>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Hosted on</th>
+                                        </tr>
+                                        <t t-foreach="repos" t-as="repo">
+                                            <tr>
+                                                <td>
+                                                   <a t-attf-href="/runbot/#{'repo/%s' % slug(repo)}"><span t-field="repo.name" /></a>
+                                                </td>
+                                                <td>
+                                                    <span t-field="repo.git_host" />
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- /.box-body -->
+                        </div>
+                        <!-- /.box -->
+                    </div>
+                </div>
+            </t>
+        </template>
+        <!--Runbot repository page-->
+        <template id="runbot.repo">
+            <t t-call='website.layout'>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="box">
+                            <div class="box-header">
+                                <h3 class="box-title">Branches</h3>
+                                <div class="box-tools">
+                                    <div class="input-group input-group-sm" style="width: 150px;">
+                                        <input type="text" name="table_search" class="form-control pull-right" placeholder="Search" />
+
+                                        <div class="input-group-btn">
+                                            <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /.box-header -->
+                            <div class="box-body table-responsive no-padding">
+                                <table class="table table-hover">
+                                    <tbody>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Ref name</th>
+                                            <th>Builds</th>
+                                        </tr>
+                                        <t t-foreach="repo.branch_ids" t-as="branch">
+                                            <tr>
+                                                <td>
+                                                   <span t-field="branch.name" />
+                                                </td>
+                                                <td>
+                                                    <span t-field="branch.ref_name" />
+                                                </td>
+                                                <td>
+                                                    <t t-foreach="branch.build_ids" t-as="build">
+                                                        <div class="info-box">
+                                                            <span class="info-box-icon bg-aqua">
+                                                                <i class="ion ion-ios-gear-outline"></i>
+                                                            </span>
+                                                            <div class="info-box-content">
+                                                                <a t-attf-href="/runbot/#{'build/%s' % slug(build)}"><span class="info-box-text">#<t t-esc="build.id"/></span></a>
+                                                                <span class="info-box-number" t-field="build.short_name"/>
+                                                            </div>
+                                                            <!-- /.info-box-content -->
+                                                        </div>
+                                                    </t>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- /.box-body -->
+                        </div>
+                        <!-- /.box -->
+                    </div>
+                </div>
+            </t>
+        </template>
+    </data>
+</openerp>

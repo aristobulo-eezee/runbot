@@ -23,8 +23,10 @@ Drone, etc.)
     'depends': ['website'],
     'data': [
         'views/runbot_view.xml',
+        'views/runbot_template.xml',
         'views/repo_view.xml',
         'views/build_view.xml',
+        'data/runbot_data.xml',
     ],
     'demo': [],
     'installable': True,

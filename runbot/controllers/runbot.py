@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 from openerp import http
 from openerp.http import request
+from openerp.addons.website.models.website import slug
 
 import logging
 
@@ -38,3 +39,25 @@ class RunbotController(http.Controller):
             })
         else:
             env['runbot.build'].sudo().schedule(build.id)
+
+        return {}
+
+    @http.route('/runbot/', type='http', auth="public", website=True)
+    def home(self):
+        env = request.env
+        repos = env['runbot.repo'].sudo().search([
+            ('published', '=', True), ])
+        context = {
+            'repos': repos,
+            'slug': slug,
+        }
+        return request.website.render('runbot.home', context)
+
+    @http.route('/runbot/repo/<model("runbot.repo"):repo>',
+                type='http', auth="public", website=True)
+    def repo(self, repo):
+        context = {
+            'repo': repo,
+            'slug': slug,
+        }
+        return request.website.render('runbot.repo', context)
