@@ -6,7 +6,10 @@ from openerp.exceptions import Warning, ValidationError
 import os
 import uuid
 import shutil
+import logging
 from git import Repo, RemoteReference, TagReference, Head
+
+_logger = logging.getLogger(__name__)
 
 
 class Repository(models.Model):
@@ -77,6 +80,7 @@ class Repository(models.Model):
         repos = self.browse(cr, uid, ids, context=context)
         for repo in repos:
             if os.path.exists(repo.get_dir()):
+                _logger.info('Cleaning repo: %s filesystem.' % repo.name)
                 shutil.rmtree(repo.get_dir(), ignore_errors=True)
         return super(Repository, self).unlink(cr, uid, ids, context=context)
 
@@ -91,34 +95,39 @@ class Repository(models.Model):
         :return:
         """
         self.ensure_one()
-        try:
-            if not branch:
-                # Create bare repo
-                repo = Repo.clone_from(
-                    self.name, self.get_dir(), no_single_branch=True,
-                    bare=True)
-                git = repo.git
-                git.fetch()
-            else:
-                # Get sources from bare repo
-                bare = Repo(self.get_dir())
-                git = bare.git
-                git.fetch()
-                repo = Repo.clone_from(
-                    self.get_dir(), to_path=to_path, branch=branch)
-                if commit:
-                    repo.commit(commit)
-            heads = []
-            tags = []
-            for ref in repo.references:
-                if isinstance(ref, (RemoteReference, Head)):
-                    heads.append((ref.name, ref.path))
-                elif isinstance(ref, TagReference):
-                    tags.append(ref.name)
-            self.update_branches(heads=heads)
-            self.update_tags(tags=tags)
-        except Exception as e:
-            raise Warning(e)
+        # try:
+        if not branch:
+            # Create bare repo
+            _logger.info('Cloning bare repo in: %s.' % self.get_dir())
+            repo = Repo.clone_from(
+                self.name, self.get_dir(), bare=True)
+            git = repo.git
+            _logger.info('Fetching %s.' % self.name)
+            git.fetch()
+        else:
+            # Get sources from bare repo
+            bare = Repo(self.get_dir())
+            git = bare.git
+            _logger.info('Fetching %s.' % self.name)
+            git.fetch('origin', '%s:%s' % branch)
+            _logger.info('Cloning repo: %s to: %s.' % (self.name, to_path))
+            repo = Repo.clone_from(
+                self.get_dir(), to_path=to_path, branch=branch)
+            if commit:
+                repo.commit(commit)
+        heads = []
+        tags = []
+        for ref in repo.references:
+            if isinstance(ref, (RemoteReference, Head)):
+                heads.append((ref.name,
+                              ref.path.replace('refs/remotes/origin/',
+                                               'refs/heads/')))
+            elif isinstance(ref, TagReference):
+                tags.append(ref.name)
+        self.update_branches(heads=heads)
+        self.update_tags(tags=tags)
+        # except Exception as e:
+        #     raise Warning(e)
 
     @api.multi
     def update_branches(self, heads=[]):
@@ -129,16 +138,18 @@ class Repository(models.Model):
         :return:
         """
         self.ensure_one()
+        _logger.info('Updating branches.')
         branches = [b.ref_name for b in self.branch_ids]
         for head in heads:
             if 'origin/HEAD' not in head[1] and head[1] not in branches:
                 values = {
                     'repo_id': self.id,
                     'name': head[0],
-                    'ref_name': head[1].replace('refs/remotes/origin/',
-                                                'refs/heads/'),
+                    'ref_name': head[1],
                 }
                 self.env['runbot.branch'].create(values)
+                _logger.info('Added new branch: %s to %s.' % (
+                    head[1], self.name))
 
     @api.multi
     def update_tags(self, tags=[]):
@@ -149,12 +160,15 @@ class Repository(models.Model):
         :return:
         """
         self.ensure_one()
+        _logger.info('Updating tags.')
         repo_tags = [t.name for t in self.tag_ids]
         for tag in tags:
             if tag not in repo_tags:
                 self.env['runbot.repo.tag'].create({
                     'repo_id': self.id,
                     'name': tag})
+                _logger.info('Added new tag: %s to %s.' % (
+                    tag, self.name))
 
     @api.multi
     def repo_publish_button(self):
