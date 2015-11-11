@@ -37,4 +37,4 @@ class RunbotController(http.Controller):
                 'branch_id': branch.id,
             })
         else:
-            build.schedule()
+            env['runbot.build'].sudo().schedule(build.id)

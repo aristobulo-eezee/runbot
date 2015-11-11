@@ -81,12 +81,13 @@ class Repository(models.Model):
         return super(Repository, self).unlink(cr, uid, ids, context=context)
 
     @api.multi
-    def clone(self, branch=None, to_path=None):
+    def clone(self, branch=None, to_path=None, commit='HEAD'):
         """
         Shallow clone a repository, if branch name is specified it will clone
         only that branch
         :param branch: string: branch name
         :param to_path: string: destination dir
+        :param commit: string: desired commit sha
         :return:
         """
         self.ensure_one()
@@ -96,10 +97,17 @@ class Repository(models.Model):
                 repo = Repo.clone_from(
                     self.name, self.get_dir(), depth=1, no_single_branch=True,
                     bare=True)
+                git = repo.git
+                git.fetch()
             else:
                 # Get sources from bare repo
+                bare = Repo(self.get_dir())
+                git = bare.git
+                git.fetch()
                 repo = Repo.clone_from(
                     self.get_dir(), to_path=to_path, depth=1, branch=branch)
+                if commit:
+                    repo.commit(commit)
             heads = []
             tags = []
             for ref in repo.references:
@@ -123,7 +131,7 @@ class Repository(models.Model):
         self.ensure_one()
         branches = [b.ref_name for b in self.branch_ids]
         for head in heads:
-            if 'origin/HEAD' not in head[1] and head[0] not in branches:
+            if 'origin/HEAD' not in head[1] and head[1] not in branches:
                 values = {
                     'repo_id': self.id,
                     'name': head[0],

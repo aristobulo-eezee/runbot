@@ -40,6 +40,7 @@ class Build(models.Model):
     parts_dir = fields.Char(string='Parts', compute='_compute_dirs')
     custom_dir = fields.Char(string='Custom modules', compute='_compute_dirs')
     odoo_dir = fields.Char(string='Odoo', compute='_compute_dirs')
+    short_name = fields.Char(string='Short name', compute='_compute_dirs')
 
     @api.depends('commit', 'branch_id', 'branch_id.name', 'repo_id')
     def _compute_dirs(self):
@@ -49,6 +50,9 @@ class Build(models.Model):
             build.parts_dir = '%s/parts' % build.env_dir
             build.custom_dir = '%s/custom' % build.parts_dir
             build.odoo_dir = '%s/odoo' % build.parts_dir
+            build.short_name = '%s-%s' % \
+                               (build.commit[:8],
+                                build.branch_id.name.replace('/', '-'),)
 
     @api.multi
     def kill(self):
@@ -57,13 +61,18 @@ class Build(models.Model):
         :return:
         """
         for build in self:
-            _logger.info('Killing build: %s-%s' %
-                         (build.commit, build.branch_id.name))
-            if build.pid:
+            _logger.info('Killing build: %s' % build.short_name)
+            if build.pid and psutil.pid_exists(build.pid):
                 try:
                     os.kill(build.pid, signal.SIGKILL)
                 except Exception as e:
                     _logger.error(e)
+            build.write({
+                'port': None,
+                'lp_port': None,
+                'pid': None,
+                'state': 'killed'})
+        return True
 
     @api.multi
     def start_server(self):
@@ -75,8 +84,7 @@ class Build(models.Model):
         if self.pid and psutil.pid_exists(self.pid):
             return False, _('Process is running, please stop before start.')
         venv = os.environ.copy()
-        _logger.info('Starting build: %s-%s' %
-                     (self.commit, self.branch_id.name))
+        _logger.info('Starting build: %s' % self.short_name)
         _logger.info('Get open ports for odoo and longpolling.')
         odoo_port = self.get_open_port()
         lp_port = self.get_open_port()
@@ -86,7 +94,7 @@ class Build(models.Model):
             '%s/bin/python' % self.env_dir,
             '%s/openerp-server' % self.odoo_dir,
             '-r', 'odoo',
-            '--db-filter', '%s-%s' % (self.commit, self.branch_id.name),
+            '--db-filter', '%s.*$' % self.short_name,
             '--addons-path=%s/addons,%s' % (self.odoo_dir, self.custom_dir),
             '--xmlrpc-port=%s' % odoo_port, '--longpolling-port=%s' % lp_port],
             env=venv)
@@ -110,12 +118,11 @@ class Build(models.Model):
             _logger.info('Cleaning filesystem.')
             if os.path.exists(build.env_dir):
                 shutil.rmtree(build.env_dir, ignore_errors=True)
-            _logger.info('Dropping database %s.' %
-                         '%s-%s' % (self.commit, self.branch_id.name))
+            _logger.info('Dropping database %s.' % self.short_name)
             dropdb = subprocess.Popen([
                 'dropdb',
                 '--if-exists',
-                '%s-%s' % (self.commit, self.branch_id.name)])
+                self.short_name])
             dropdb.wait()
 
     @api.multi
@@ -129,15 +136,17 @@ class Build(models.Model):
         self.clean()
         self.state = 'creation'
 
-        _logger.info('Preparing build: %s-%s' %
-                     (self.commit, self.branch_id.name))
+        _logger.info('Preparing build: %s' % self.short_name)
         if not os.path.exists(self.env_dir):
             virtualenv.create_environment(self.env_dir)
         if not os.path.exists(self.parts_dir):
             os.makedirs(self.parts_dir)
+        if not os.path.exists(self.env_dir+'/logs'):
+            os.makedirs(self.env_dir+'/logs')
 
         _logger.info('Cloning %s' % self.branch_id.name)
-        self.repo_id.clone(branch=self.branch_id.name, to_path=self.custom_dir)
+        self.repo_id.clone(branch=self.branch_id.name, to_path=self.custom_dir,
+                           commit=self.commit)
 
         _logger.info('Cloning odoo')
         odoo_repo = self.env['runbot.repo'].search([
@@ -161,12 +170,10 @@ class Build(models.Model):
             '%s/requirements.txt' % self.custom_dir], env=venv)
         pip_custom.wait()
 
-        _logger.info('Creating database %s-%s' % (
-            self.commit, self.branch_id.name))
+        _logger.info('Creating database %s' % self.short_name)
         createdb = subprocess.Popen([
             'createdb', '--encoding=unicode', '--lc-collate=C',
-            '--template=template0',
-            '%s-%s' % (self.commit, self.branch_id.name)], env=venv)
+            '--template=template0', self.short_name], env=venv)
         createdb.wait()
 
     def get_open_port(self):
@@ -205,7 +212,7 @@ class Build(models.Model):
         build = self.browse(build_id)
         cron = self.env['ir.cron'].sudo().create({
             'active': True,
-            'name': '%s-%s at %s' % (build.branch_id.name, build.commit, at),
+            'name': '%s at %s' % (build.short_name, at),
             'priority': 5,
             'numbercall': 1,
             'nextcall': at,
