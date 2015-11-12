@@ -216,7 +216,6 @@ class Build(models.Model):
 
         _logger.info('Installing odoo dependencies')
         venv = os.environ.copy()
-        venv['PATH'] += '/Library/PostgreSQL/9.3/bin/:'
         # Fix from https://github.com/gevent/gevent/issues/656
         venv['CFLAGS'] = '-std=c99'
         pip_odoo = subprocess.Popen([

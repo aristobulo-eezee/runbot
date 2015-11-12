@@ -1,12 +1,8 @@
 {
   "odoo": "9.0",
   "without-demo": "all",
-  "tests-enabled": "False",
   "addons": {
     "path": [""],
     "install": ["runbot"]
-  },
-  "git": {
-    "submodules": "False"
   }
 }

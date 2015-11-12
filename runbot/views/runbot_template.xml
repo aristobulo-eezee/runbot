@@ -64,6 +64,9 @@
                                                    <a t-attf-href="/runbot/#{'repo/%s' % slug(repo)}"><span t-field="repo.name" /></a>
                                                 </td>
                                                 <td>
+                                                    <i class="fa fa-github" t-if="repo.git_host =='github'"/>
+                                                    <i class="fa fa-bitbucket" t-if="repo.git_host =='bitbucket'"/>
+                                                    <i class="fa fa-git" t-if="repo.git_host not in ['bitbucket', 'github']"/>
                                                     <span t-field="repo.git_host" />
                                                 </td>
                                             </tr>
@@ -129,9 +132,9 @@
                                                                         <a t-attf-href="#{'/runbot/build/%s/start' % slug(build)}" target="_self" class="info-box-icon bg-gray disabled" t-if="build.state in ['stopped', 'killed']">
                                                                             <i class="ion-ios-refresh-empty"></i>
                                                                         </a>
-                                                                        <a t-attf-href="#{'/runbot/build/%s/start' % slug(build)}" target="_self" class="info-box-icon bg-yellow disabled" t-if="build.state in ['scheduled', 'scheduled']">
+                                                                        <span class="info-box-icon bg-yellow disabled" t-if="build.state in ['scheduled', 'scheduled']">
                                                                             <i class="ion-ios-clock-outline"></i>
-                                                                        </a>
+                                                                        </span>
                                                                         <div class="info-box-content">
                                                                             <a t-attf-href="/runbot/#{'build/%s' % slug(build)}"><span class="info-box-text">#<t t-esc="build.id"/></span></a>
                                                                             <span class="info-box-number" t-field="build.short_name"/>

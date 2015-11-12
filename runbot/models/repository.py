@@ -24,7 +24,10 @@ class Repository(models.Model):
                                copy=False)
     git_host = fields.Selection([
         ('local', _('Local')),
-        ('github', _('Github')), ], string='Hosting', required=True,
+        ('github', _('Github')),
+        ('bitbucket', _('Bitbucket')),
+        ('gitlab', _('Gitlab')),
+    ], string='Hosting', required=True,
         default='github',
         help='Provider where git repository is hosted. Local means git '
              'repository is located on the same filesystem as runbot.')
