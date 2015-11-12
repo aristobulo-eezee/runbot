@@ -108,7 +108,10 @@
                                         <t t-foreach="branches" t-as="branch">
                                             <tr>
                                                 <td>
-                                                   <h4><i t-attf-class="text-center #{'fa fa-star-o text-muted' if not branch.is_sticky else 'fa fa-star text-yellow'}"></i></h4>
+                                                   <h4>
+                                                       <i class="text-center fa fa-star text-yellow" t-if="branch.is_sticky"></i>
+                                                       <i class="text-center fa fa-star-o text-muted" t-if="not branch.is_sticky"></i>
+                                                   </h4>
                                                 </td>
                                                 <td>
                                                    <h4 t-field="branch.name" />
@@ -120,8 +123,14 @@
                                                             <t t-foreach="branch.build_ids[:5]" t-as="build">
                                                                 <td class="builds-wrapper">
                                                                     <div class="info-box">
-                                                                        <a t-attf-href="#{'http://localhost:%s' % build.port if build.state == 'running' else '/runbot/build/%s/start' % slug(build)}" t-attf-target="#{'_blank' if build.state == 'running' else '_self'}" t-attf-class="info-box-icon #{'bg-aqua' if build.state == 'running' else 'bg-gray'}">
-                                                                            <i t-attf-class="#{'ion-ios-gear-outline' if build.state == 'running' else 'ion-ios-refresh-empty'}"></i>
+                                                                        <a t-attf-href="#{'http://localhost:%s' % build.port}" t-if="build.state == 'running'" target="_blank" class="info-box-icon bg-aqua">
+                                                                            <i class="ion-ios-gear-outline"></i>
+                                                                        </a>
+                                                                        <a t-attf-href="#{'/runbot/build/%s/start' % slug(build)}" target="_self" class="info-box-icon bg-gray disabled" t-if="build.state in ['stopped', 'killed']">
+                                                                            <i class="ion-ios-refresh-empty"></i>
+                                                                        </a>
+                                                                        <a t-attf-href="#{'/runbot/build/%s/start' % slug(build)}" target="_self" class="info-box-icon bg-yellow disabled" t-if="build.state in ['scheduled', 'scheduled']">
+                                                                            <i class="ion-ios-clock-outline"></i>
                                                                         </a>
                                                                         <div class="info-box-content">
                                                                             <a t-attf-href="/runbot/#{'build/%s' % slug(build)}"><span class="info-box-text">#<t t-esc="build.id"/></span></a>
