@@ -13,3 +13,10 @@
 .content {
     margin-top: 25px;
 }
+
+.breadcrumb {
+    float: left !important;
+    right: auto !important;
+    font-size: 14px !important;
+
+}

@@ -18,6 +18,7 @@ _logger = logging.getLogger(__name__)
 class Build(models.Model):
     _name = 'runbot.build'
     _rec_name = 'commit'
+    _order = 'id desc'
 
     # Fields
     commit = fields.Char(string='Commit', required=True)

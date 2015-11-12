@@ -19,8 +19,10 @@
                     <section class="content-header">
                         <ol class="breadcrumb">
                             <li><a href="/runbot"><i class="fa fa-home"></i></a></li>
-                            <!--<li><a href="#">Tables</a></li>-->
-                            <!--<li class="active">Simple</li>-->
+                            <t t-foreach="breadcrumbs" t-as="breadcrumb">
+                                <li t-if="not breadcrumb['active']"><a t-attf-href="#{breadcrumb['url']}"><t t-esc="breadcrumb['string']" /></a></li>
+                                <li class="active" t-if="breadcrumb['active']"><t t-esc="breadcrumb['string']" /></li>
+                            </t>
                         </ol>
                     </section>
                     <section class="content">
@@ -99,22 +101,27 @@
                                 <table class="table table-hover">
                                     <tbody>
                                         <tr>
-                                            <th style="width:100px">Name</th>
+                                            <th style="width:30px"></th>
+                                            <th style="width:200px">Name</th>
                                             <th>Builds</th>
                                         </tr>
-                                        <t t-foreach="repo.branch_ids" t-as="branch">
+                                        <t t-foreach="repo.branch_ids.sorted(key=lambda r: r not in r.repo_id.sticky_branch_ids)" t-as="branch">
                                             <tr>
                                                 <td>
-                                                   <span t-field="branch.name" />
+                                                   <h4><i t-attf-class="text-center #{'fa fa-star-o' if branch not in branch.repo_id.sticky_branch_ids else 'fa fa-star text-yellow'}"></i></h4>
                                                 </td>
                                                 <td>
-                                                    <table>
+                                                   <h4 t-field="branch.name" />
+                                                </td>
+                                                <td>
+                                                    <h4 t-if="not branch.build_ids" class="text-muted">There are no builds for this branch yet.</h4>
+                                                    <table t-if="branch.build_ids">
                                                         <tr>
                                                             <t t-foreach="branch.build_ids[:5]" t-as="build">
                                                                 <td class="builds-wrapper">
                                                                     <div class="info-box">
-                                                                        <a t-attf-href="http://localhost:#{build.port}" target="_blank" t-attf-class="info-box-icon #{'bg-aqua' if build.state == 'running' else 'bg-gray'}">
-                                                                            <i t-attf-class="#{'ion-ios-gear-outline' if build.state == 'running' else 'ion-ios-reload'}"></i>
+                                                                        <a t-attf-href="#{'http://localhost:%s' % build.port if build.state == 'running' else '/runbot/build/%s/start' % slug(build)}" t-attf-target="#{'_blank' if build.state == 'running' else '_self'}" t-attf-class="info-box-icon #{'bg-aqua' if build.state == 'running' else 'bg-gray'}">
+                                                                            <i t-attf-class="#{'ion-ios-gear-outline' if build.state == 'running' else 'ion-ios-refresh-empty'}"></i>
                                                                         </a>
                                                                         <div class="info-box-content">
                                                                             <a t-attf-href="/runbot/#{'build/%s' % slug(build)}"><span class="info-box-text">#<t t-esc="build.id"/></span></a>

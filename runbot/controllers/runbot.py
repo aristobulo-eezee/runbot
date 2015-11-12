@@ -50,6 +50,14 @@ class RunbotController(http.Controller):
         context = {
             'repos': repos,
             'slug': slug,
+            'breadcrumbs': [
+                {
+                    'string': 'Repositories',
+                    'url': '/runbot',
+                    'active': False,
+                },
+            ],
+
         }
         return request.website.render('runbot.home', context)
 
@@ -59,5 +67,28 @@ class RunbotController(http.Controller):
         context = {
             'repo': repo,
             'slug': slug,
+            'breadcrumbs': [
+                {
+                    'string': 'Repositories',
+                    'url': '/runbot',
+                    'active': False,
+                },
+                {
+                    'string': repo.name,
+                    'url': '/runbot/repo/%s' % slug(repo),
+                    'active': True,
+                },
+            ],
         }
         return request.website.render('runbot.repo', context)
+
+    @http.route('/runbot/build/<model("runbot.build"):build>/start',
+                type='http', auth="public", website=True)
+    def start_build(self, build):
+        try:
+            build.sudo().start_server()
+        except Exception as e:
+            _logger.error(e)
+            build.sudo().run()
+
+        return request.redirect('/runbot/repo/%s' % slug(build.repo_id))
