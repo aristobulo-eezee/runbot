@@ -85,7 +85,6 @@ class RunbotController(http.Controller):
                 },
             ],
         }
-        print 'pasa!'
         return request.website.render('runbot.repo', context)
 
     @http.route('/runbot/build/<model("runbot.build"):build>/start',

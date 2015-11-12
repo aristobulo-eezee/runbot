@@ -116,6 +116,8 @@ class Repository(models.Model):
                     self.get_dir(), to_path=to_path, branch=branch)
                 if commit:
                     repo.commit(commit)
+                for submodule in repo.submodules:
+                        submodule.update(init=True)
             heads = []
             tags = []
             for ref in repo.references:

@@ -77,6 +77,50 @@ class Build(models.Model):
         return True
 
     @api.multi
+    def install_server(self):
+        self.ensure_one()
+        runbot_cfg = self.read_json()
+
+        if self.pid and psutil.pid_exists(self.pid):
+            return False
+        venv = os.environ.copy()
+        _logger.info('Install odoo on build: %s' % self.short_name)
+        _logger.info('Get open ports for odoo and longpolling.')
+        odoo_port = self.get_open_port()
+        lp_port = self.get_open_port()
+        _logger.info('Found %s and %s.' % (odoo_port, lp_port))
+
+        _logger.info('Installing odoo server.')
+
+        # Prepare command
+        cmd = [
+            '%s/bin/python' % self.env_dir,
+            '%s/openerp-server' % self.odoo_dir,
+            '--db-filter', '%s.*$' % self.short_name,
+            '--addons-path=%s/addons,%s' % (
+                self.odoo_dir,
+                ','.join(['%s/%s' % (self.custom_dir, p)
+                          for p in runbot_cfg['addons']['path']])),
+            '--xmlrpc-port=%s' % odoo_port, '--longpolling-port=%s' % lp_port,
+            '--logfile', '../logs/%s.log' % self.short_name,
+            '-d', self.short_name,
+            '-i', '%s' % ','.join(runbot_cfg['addons']['install']),
+            '--stop-after-init']
+
+        if runbot_cfg.get('without-demo', False):
+            cmd_without_demo = list(cmd)
+            cmd_without_demo.append(
+                '--without-demo=%s' % runbot_cfg['without-demo'])
+            odoo_server = subprocess.Popen(cmd_without_demo, env=venv)
+            odoo_server.wait()
+
+        # Now install demo data
+        odoo_server = subprocess.Popen(cmd, env=venv)
+        odoo_server.wait()
+
+        return True
+
+    @api.multi
     def start_server(self):
         """
         Run odoo build
@@ -86,7 +130,7 @@ class Build(models.Model):
         runbot_cfg = self.read_json()
 
         if self.pid and psutil.pid_exists(self.pid):
-            return False, _('Process is running, please stop before start.')
+            return False
         venv = os.environ.copy()
         _logger.info('Starting build: %s' % self.short_name)
         _logger.info('Get open ports for odoo and longpolling.')
@@ -100,11 +144,13 @@ class Build(models.Model):
             '%s/bin/python' % self.env_dir,
             '%s/openerp-server' % self.odoo_dir,
             '--db-filter', '%s.*$' % self.short_name,
-            '--addons-path=%s/addons,%s' % (self.odoo_dir, self.custom_dir),
+            '--addons-path=%s/addons,%s' % (
+                self.odoo_dir,
+                ','.join(['%s/%s' % (self.custom_dir, p)
+                          for p in runbot_cfg['addons']['path']])),
             '--xmlrpc-port=%s' % odoo_port, '--longpolling-port=%s' % lp_port,
             '--logfile', '../logs/%s.log' % self.short_name,
-            '-d', self.short_name,
-            '-i', '%s' % ','.join(runbot_cfg['addons']['install'])]
+            '-d', self.short_name, ]
 
         if runbot_cfg.get('tests', False):
             cmd.append('--test-enabled')
@@ -118,7 +164,7 @@ class Build(models.Model):
             'lp_port': lp_port,
             'state': state,
         })
-        return True, _('Listening on port %s') % odoo_port
+        return True
 
     @api.multi
     def clean(self):
@@ -178,11 +224,12 @@ class Build(models.Model):
             '%s/requirements.txt' % self.odoo_dir], env=venv)
         pip_odoo.wait()
 
-        _logger.info('Installing custom dependencies')
-        pip_custom = subprocess.Popen([
-            '%s/bin/pip' % self.env_dir, 'install', '-r',
-            '%s/requirements.txt' % self.custom_dir], env=venv)
-        pip_custom.wait()
+        if os.path.isfile('%s/requirements.txt' % self.custom_dir):
+            _logger.info('Installing custom dependencies')
+            pip_custom = subprocess.Popen([
+                '%s/bin/pip' % self.env_dir, 'install', '-r',
+                '%s/requirements.txt' % self.custom_dir], env=venv)
+            pip_custom.wait()
 
         _logger.info('Creating database %s' % self.short_name)
         createdb = subprocess.Popen([
@@ -214,6 +261,7 @@ class Build(models.Model):
         build = self.browse(build_id)
         build.kill()
         build.prepare()
+        build.install_server()
         build.start_server()
 
     @api.model
