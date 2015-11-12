@@ -54,6 +54,7 @@ class Build(models.Model):
         'runbot.repo', string='Repository', related='branch_id.repo_id',
         store=True)
     pid = fields.Integer(string='Process ID')
+    nginx_pid = fields.Integer(string='Nginx PID')
     port = fields.Integer(string='Port')
     lp_port = fields.Integer(string='Longpolling Port')
     env_dir = fields.Char(string='Virtualenv', compute='_compute_dirs')
@@ -111,11 +112,15 @@ class Build(models.Model):
         _logger.info('Installing odoo server.')
 
         # Prepare command
+        addons_path = '--addons-path='
+        if runbot_cfg.get('enterprise', False):
+            addons_path = '%s%s/enterprise,' % (addons_path, self.parts_dir)
         cmd = [
             '%s/bin/python' % self.env_dir,
             '%s/openerp-server' % self.odoo_dir,
             '--db-filter', '%s.*$' % self.short_name,
-            '--addons-path=%s/addons,%s' % (
+            '%s%s/addons,%s' % (
+                addons_path,
                 self.odoo_dir,
                 ','.join(['%s/%s' % (self.custom_dir, p)
                           for p in runbot_cfg['addons']['path']])),
@@ -158,11 +163,15 @@ class Build(models.Model):
         _logger.info('Starting odoo server.')
 
         # Prepare command
+        addons_path = '--addons-path='
+        if runbot_cfg.get('enterprise', False):
+            addons_path = '%s%s/enterprise,' % (addons_path, self.parts_dir)
         cmd = [
             '%s/bin/python' % self.env_dir,
             '%s/openerp-server' % self.odoo_dir,
             '--db-filter', '%s.*$' % self.short_name,
-            '--addons-path=%s/addons,%s' % (
+            '%s%s/addons,%s' % (
+                addons_path,
                 self.odoo_dir,
                 ','.join(['%s/%s' % (self.custom_dir, p)
                           for p in runbot_cfg['addons']['path']])),
@@ -231,6 +240,13 @@ class Build(models.Model):
         odoo_repo = self.env['runbot.repo'].search([
             ('odoo_repo', '=', True)], limit=1)
         odoo_repo.clone(branch=runbot_cfg['odoo'], to_path=self.odoo_dir)
+
+        if runbot_cfg.get('enterprise', False):
+            _logger.info('Cloning enterprise')
+            enterprise_repo = self.env['runbot.repo'].search([
+                ('name', '=', runbot_cfg['enterprise']['repo'])], limit=1)
+            enterprise_repo.clone(branch=runbot_cfg['enterprise']['branch'],
+                                  to_path=self.parts_dir+'/enterprise')
 
         _logger.info('Installing odoo dependencies')
         venv = os.environ.copy()
