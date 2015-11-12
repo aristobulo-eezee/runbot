@@ -4,13 +4,35 @@
         <!--Assets-->
         <template id="runbot.assets" inherit_id="website.assets_frontend">
             <xpath expr="." position="inside">
-                <link rel="stylesheet" href="/runbot/static/src/css/adminlte.min.css"/>
                 <link rel="stylesheet" href="/runbot/static/lib/ionicons/css/ionicons.min.css"/>
+                <link rel="stylesheet" href="/runbot/static/src/css/adminlte.min.css"/>
+                <link rel="stylesheet" href="/runbot/static/src/css/runbot.css"/>
             </xpath>
         </template>
-        <!--Runbot homepage-->
-        <template id="runbot.home">
+
+        <!--Runbot inner layuout-->
+        <template id="runbot.layout">
             <t t-call='website.layout'>
+                <!-- Content Wrapper. Contains page content -->
+                <div class="content-wrapper">
+                    <!-- Content Header (Page header) -->
+                    <section class="content-header">
+                        <ol class="breadcrumb">
+                            <li><a href="/runbot"><i class="fa fa-home"></i></a></li>
+                            <!--<li><a href="#">Tables</a></li>-->
+                            <!--<li class="active">Simple</li>-->
+                        </ol>
+                    </section>
+                    <section class="content">
+                        <t t-raw="0"/>
+                    </section>
+                </div>
+            </t>
+        </template>
+
+        <!--Runbot homepage-->
+        <template id="runbot.home" name="Runbot">
+            <t t-call='runbot.layout'>
                 <div class="row">
                     <div class="col-xs-12">
                         <div class="box">
@@ -56,7 +78,7 @@
         </template>
         <!--Runbot repository page-->
         <template id="runbot.repo">
-            <t t-call='website.layout'>
+            <t t-call='runbot.layout'>
                 <div class="row">
                     <div class="col-xs-12">
                         <div class="box">
@@ -77,8 +99,7 @@
                                 <table class="table table-hover">
                                     <tbody>
                                         <tr>
-                                            <th style="width=50px">Name</th>
-                                            <th style="width=50px">Ref name</th>
+                                            <th style="width:100px">Name</th>
                                             <th>Builds</th>
                                         </tr>
                                         <t t-foreach="repo.branch_ids" t-as="branch">
@@ -87,21 +108,24 @@
                                                    <span t-field="branch.name" />
                                                 </td>
                                                 <td>
-                                                    <span t-field="branch.ref_name" />
-                                                </td>
-                                                <td>
-                                                    <t t-foreach="branch.build_ids" t-as="build">
-                                                        <div class="info-box">
-                                                            <span class="info-box-icon bg-aqua">
-                                                                <i class="ion ion-ios-gear-outline"></i>
-                                                            </span>
-                                                            <div class="info-box-content">
-                                                                <a t-attf-href="/runbot/#{'build/%s' % slug(build)}"><span class="info-box-text">#<t t-esc="build.id"/></span></a>
-                                                                <span class="info-box-number" t-field="build.short_name"/>
-                                                            </div>
-                                                            <!-- /.info-box-content -->
-                                                        </div>
-                                                    </t>
+                                                    <table>
+                                                        <tr>
+                                                            <t t-foreach="branch.build_ids[:5]" t-as="build">
+                                                                <td class="builds-wrapper">
+                                                                    <div class="info-box">
+                                                                        <a t-attf-href="http://localhost:#{build.port}" target="_blank" t-attf-class="info-box-icon #{'bg-aqua' if build.state == 'running' else 'bg-gray'}">
+                                                                            <i t-attf-class="#{'ion-ios-gear-outline' if build.state == 'running' else 'ion-ios-reload'}"></i>
+                                                                        </a>
+                                                                        <div class="info-box-content">
+                                                                            <a t-attf-href="/runbot/#{'build/%s' % slug(build)}"><span class="info-box-text">#<t t-esc="build.id"/></span></a>
+                                                                            <span class="info-box-number" t-field="build.short_name"/>
+                                                                        </div>
+                                                                        <!-- /.info-box-content -->
+                                                                    </div>
+                                                                </td>
+                                                            </t>
+                                                        </tr>
+                                                    </table>
                                                 </td>
                                             </tr>
                                         </t>
