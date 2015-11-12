@@ -108,7 +108,7 @@
                                         <t t-foreach="branches" t-as="branch">
                                             <tr>
                                                 <td>
-                                                   <h4><i t-attf-class="text-center #{'fa fa-star-o' if branch.is_sticky else 'fa fa-star text-yellow'}"></i></h4>
+                                                   <h4><i t-attf-class="text-center #{'fa fa-star-o text-muted' if not branch.is_sticky else 'fa fa-star text-yellow'}"></i></h4>
                                                 </td>
                                                 <td>
                                                    <h4 t-field="branch.name" />
