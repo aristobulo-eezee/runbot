@@ -64,8 +64,13 @@ class RunbotController(http.Controller):
     @http.route('/runbot/repo/<model("runbot.repo"):repo>',
                 type='http', auth="public", website=True)
     def repo(self, repo):
+        env = request.env
+        branches = env['runbot.branch'].sudo().search([
+            ('repo_id', '=', repo.id)]).sorted(
+            key=lambda r: r not in r.repo_id.sticky_branch_ids)
         context = {
             'repo': repo,
+            'branches': branches,
             'slug': slug,
             'breadcrumbs': [
                 {
@@ -80,6 +85,7 @@ class RunbotController(http.Controller):
                 },
             ],
         }
+        print 'pasa!'
         return request.website.render('runbot.repo', context)
 
     @http.route('/runbot/build/<model("runbot.build"):build>/start',

@@ -27,6 +27,7 @@ Drone, etc.)
         'views/repo_view.xml',
         'views/build_view.xml',
         'data/runbot_data.xml',
+        'security/ir.model.access.csv',
     ],
     'demo': [],
     'installable': True,

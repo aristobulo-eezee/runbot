@@ -36,7 +36,8 @@ class Repository(models.Model):
         string='Auth Token', default=lambda self: uuid.uuid4().hex,
         help='Use this token in your webhooks to authenticate.'
              'Example: http://example.com/runbot/webhook/push?'
-             'token=8c05904f0051419283d1024fc5ce1a59')
+             'token=8c05904f0051419283d1024fc5ce1a59',
+        groups='base.group_configuration')
 
     _sql_constraints = [
         ('unq_name', 'unique(name)', 'Repository must be unique!'),

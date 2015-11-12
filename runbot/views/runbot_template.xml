@@ -79,7 +79,7 @@
             </t>
         </template>
         <!--Runbot repository page-->
-        <template id="runbot.repo">
+        <template id="runbot.repo" name="Repository">
             <t t-call='runbot.layout'>
                 <div class="row">
                     <div class="col-xs-12">
@@ -105,10 +105,10 @@
                                             <th style="width:200px">Name</th>
                                             <th>Builds</th>
                                         </tr>
-                                        <t t-foreach="repo.branch_ids.sorted(key=lambda r: r not in r.repo_id.sticky_branch_ids)" t-as="branch">
+                                        <t t-foreach="branches" t-as="branch">
                                             <tr>
                                                 <td>
-                                                   <h4><i t-attf-class="text-center #{'fa fa-star-o' if branch not in branch.repo_id.sticky_branch_ids else 'fa fa-star text-yellow'}"></i></h4>
+                                                   <h4><i t-attf-class="text-center #{'fa fa-star-o' if branch.is_sticky else 'fa fa-star text-yellow'}"></i></h4>
                                                 </td>
                                                 <td>
                                                    <h4 t-field="branch.name" />

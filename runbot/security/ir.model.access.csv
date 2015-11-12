@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_runbot_repo,access_runbot_repo,model_runbot_repo,,1,0,0,0
+access_runbot_branch,access_runbot_branch,model_runbot_branch,,1,0,0,0
+access_runbot_repo_tag,access_runbot_repo_tag,model_runbot_repo_tag,,1,0,0,0
+access_runbot_build,access_runbot_build,model_runbot_build,,1,0,0,0
