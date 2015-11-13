@@ -123,7 +123,7 @@
                                                     <h4 t-if="not branch.build_ids" class="text-muted">There are no builds for this branch yet.</h4>
                                                     <table t-if="branch.build_ids">
                                                         <tr>
-                                                            <t t-foreach="branch.build_ids[:5]" t-as="build">
+                                                            <t t-foreach="branch.build_ids[:4]" t-as="build">
                                                                 <td class="builds-wrapper">
                                                                     <div class="info-box">
                                                                         <a t-attf-href="#{'http://localhost:%s' % build.port}" t-if="build.state == 'running'" target="_blank" class="info-box-icon bg-aqua">
@@ -132,12 +132,13 @@
                                                                         <a t-attf-href="#{'/runbot/build/%s/start' % slug(build)}" target="_self" class="info-box-icon bg-gray disabled" t-if="build.state in ['stopped', 'killed']">
                                                                             <i class="ion-ios-refresh-empty"></i>
                                                                         </a>
-                                                                        <span class="info-box-icon bg-yellow disabled" t-if="build.state in ['scheduled', 'scheduled']">
+                                                                        <span class="info-box-icon bg-yellow disabled" t-if="build.state in ['scheduled', 'creation', 'installing']">
                                                                             <i class="ion-ios-clock-outline"></i>
                                                                         </span>
                                                                         <div class="info-box-content">
                                                                             <a t-attf-href="/runbot/#{'build/%s' % slug(build)}"><span class="info-box-text">#<t t-esc="build.id"/></span></a>
                                                                             <span class="info-box-number" t-field="build.short_name"/>
+                                                                            <small class="text-muted" t-field="build.state"/>
                                                                         </div>
                                                                         <!-- /.info-box-content -->
                                                                     </div>

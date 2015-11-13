@@ -43,6 +43,7 @@ class Build(models.Model):
     state = fields.Selection([
         ('scheduled', _('Scheduled')),
         ('creation', _('Creation')),
+        ('installing', _('Installing')),
         ('running', _('Running')),
         ('killed', _('Killed')),
         ('stopped', _('Stopped')), ], string='Status', default='scheduled')
@@ -98,6 +99,7 @@ class Build(models.Model):
     @api.multi
     def install_server(self):
         self.ensure_one()
+        self.state = 'installing'
         runbot_cfg = self.read_json()
 
         if self.pid and psutil.pid_exists(self.pid):
@@ -125,7 +127,7 @@ class Build(models.Model):
                 ','.join(['%s/%s' % (self.custom_dir, p)
                           for p in runbot_cfg['addons']['path']])),
             '--xmlrpc-port=%s' % odoo_port, '--longpolling-port=%s' % lp_port,
-            '--logfile', '../logs/%s.log' % self.short_name,
+            '--logfile', '%s/logs/install.log' % self.env_dir,
             '-d', self.short_name,
             '-i', '%s' % ','.join(runbot_cfg['addons']['install']),
             '--stop-after-init']
@@ -176,7 +178,7 @@ class Build(models.Model):
                 ','.join(['%s/%s' % (self.custom_dir, p)
                           for p in runbot_cfg['addons']['path']])),
             '--xmlrpc-port=%s' % odoo_port, '--longpolling-port=%s' % lp_port,
-            '--logfile', '../logs/%s.log' % self.short_name,
+            '--logfile', '%s/logs/server.log' % self.env_dir,
             '-d', self.short_name, ]
 
         if runbot_cfg.get('tests', False):
