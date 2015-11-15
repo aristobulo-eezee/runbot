@@ -67,9 +67,12 @@ class Build(models.Model):
     @api.depends('commit', 'branch_id', 'branch_id.name', 'repo_id')
     def _compute_dirs(self):
         for build in self:
+            # TODO: make replacement cleaner
             build.short_name = '%s-%s' % \
                                (build.commit[:8],
-                                build.branch_id.name.replace('/', '-'))
+                                build.branch_id.name
+                                .replace('/', '-')
+                                .replace('.', '-'))
             build.env_dir = '%sbuild/%s' % (
                 build.repo_id.root(), build.short_name)
             build.parts_dir = '%s/parts' % build.env_dir
@@ -231,6 +234,17 @@ class Build(models.Model):
                 '--if-exists',
                 self.short_name])
             dropdb.wait()
+            _logger.info('Remove nginx config file.')
+            if os.path.isfile(os.path.join(
+                    self.repo_id.root(),
+                    'nginx/%s.conf' % self.short_name)):
+                os.remove(
+                    os.path.join(self.repo_id.root(),
+                                 'nginx/%s.conf' % self.short_name))
+            # Odoo user must be part of sudoers and able to execute nginx
+            # reload with sudo without being prompted for password
+            nginx = subprocess.Popen(['sudo', '/etc/init.d/nginx', 'reload'])
+            nginx.wait()
 
     @api.multi
     def prepare(self):
