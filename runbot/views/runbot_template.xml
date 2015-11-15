@@ -126,8 +126,8 @@
                                                             <t t-foreach="branch.build_ids[:4]" t-as="build">
                                                                 <td class="builds-wrapper">
                                                                     <div class="info-box">
-                                                                        <a t-attf-href="#{'http://localhost:%s' % build.port}" t-if="build.state == 'running'" target="_blank" class="info-box-icon bg-aqua">
-                                                                            <i class="ion-ios-gear-outline"></i>
+                                                                        <a t-attf-href="#{'http://%s.%s' % (build.short_name, fqdn)}" t-if="build.state == 'running'" target="_blank" class="info-box-icon bg-aqua">
+                                                                            <i class="ion-log-in"></i>
                                                                         </a>
                                                                         <a t-attf-href="#{'/runbot/build/%s/start' % slug(build)}" target="_self" class="info-box-icon bg-gray disabled" t-if="build.state in ['stopped', 'killed']">
                                                                             <i class="ion-ios-refresh-empty"></i>
