@@ -1,2 +1,3 @@
 gitpython==1.0.1
 virtualenv==13.1.2
+ago==0.0.6
