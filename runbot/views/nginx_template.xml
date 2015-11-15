@@ -11,7 +11,7 @@ upstream <t t-esc="short_name"/>-longpolling {
 
 server {
     listen 80;
-    server_name ~^<t t-esc="short_name"/>[-.].*$;;
+    server_name ~^<t t-esc="short_name"/>[-.].*$;
 
     location / {
         proxy_pass http://<t t-esc="short_name"/>;

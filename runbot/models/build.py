@@ -208,7 +208,7 @@ class Build(models.Model):
              'w+').write(nginx_config)
         nginx = subprocess.Popen(['/etc/init.d/nginx', 'reload'])
         nginx.wait()
-        
+
         return True
 
     @api.multi
