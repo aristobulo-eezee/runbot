@@ -20,6 +20,7 @@
 from openerp import http
 from openerp.http import request
 from openerp.addons.website.models.website import slug
+from openerp.fields import Datetime
 
 import logging
 import socket
@@ -30,6 +31,11 @@ _logger = logging.getLogger(__name__)
 
 
 class RunbotController(http.Controller):
+    def time_ago(self, from_):
+        if from_ is None:
+            from_ = Datetime.now()
+        return human(Datetime.from_string(from_), 1)
+
     @http.route('/runbot/webhook/push',
                 type='json', auth="none")
     def push_event(self, req):
@@ -90,7 +96,7 @@ class RunbotController(http.Controller):
             ('repo_id', '=', repo.id)]).sorted(
             key=lambda r: r not in r.repo_id.sticky_branch_ids)
         context = {
-            'time_ago': human,
+            'time_ago': self.time_ago,
             'fqdn': socket.getfqdn(),
             'repo': repo,
             'branches': branches,
