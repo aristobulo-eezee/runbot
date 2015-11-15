@@ -281,7 +281,7 @@ class Build(models.Model):
             'lp_port': self.lp_port,
         }
         nginx_config = self.pool['ir.ui.view'].render(
-            self.cr, self.env.user.id, 
+            self.env.cr, self.env.user.id,
             'runbot.nginx_template', values=ngx_build)
         open(os.path.join('../nginx/', '%s.conf' % self.short_name),
              'w').write(nginx_config)
