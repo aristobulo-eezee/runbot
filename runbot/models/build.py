@@ -207,7 +207,9 @@ class Build(models.Model):
         open(os.path.join(self.repo_id.root(),
                           'nginx/%s.conf' % self.short_name),
              'w+').write(nginx_config)
-        nginx = subprocess.Popen(['/etc/init.d/nginx', 'reload'])
+        # Odoo user must be part of sudoers and able to execute nginx reload
+        # with sudo without being prompted for password
+        nginx = subprocess.Popen(['sudo', 'service', 'nginx', 'reload'])
         nginx.wait()
 
         return True
