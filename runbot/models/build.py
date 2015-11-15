@@ -284,7 +284,7 @@ class Build(models.Model):
             self.env.cr, self.env.user.id,
             'runbot.nginx_template', values=ngx_build)
         open(os.path.join('../nginx/', '%s.conf' % self.short_name),
-             'w').write(nginx_config)
+             'w+').write(nginx_config)
         nginx = subprocess.Popen(['/etc/init.d/nginx', 'reload'])
         nginx.wait()
 
