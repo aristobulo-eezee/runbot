@@ -43,6 +43,7 @@ Drone, etc.)
     'data': [
         'views/runbot_view.xml',
         'views/runbot_template.xml',
+        'views/nginx_template.xml',
         'views/repo_view.xml',
         'views/build_view.xml',
         'data/runbot_data.xml',
