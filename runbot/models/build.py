@@ -193,6 +193,22 @@ class Build(models.Model):
             'lp_port': lp_port,
             'state': state,
         })
+
+        _logger.info('Configuring nginx')
+        # I like this solution so I copied it from odoo ;)
+        ngx_build = {
+            'short_name': self.short_name,
+            'port': self.port,
+            'lp_port': self.lp_port,
+        }
+        nginx_config = self.pool['ir.ui.view'].render(
+            self.env.cr, self.env.user.id,
+            'runbot.nginx_template', values=ngx_build)
+        open(os.path.join(self.repo_id.root(), 'nginx/%s.conf' % self.short_name),
+             'w+').write(nginx_config)
+        nginx = subprocess.Popen(['/etc/init.d/nginx', 'reload'])
+        nginx.wait()
+        
         return True
 
     @api.multi
@@ -275,21 +291,6 @@ class Build(models.Model):
             '-U', 'odoo',
             '--template=template0', self.short_name], env=venv)
         createdb.wait()
-
-        _logger.info('Configuring nginx')
-        # I like this solution so I copied it from odoo ;)
-        ngx_build = {
-            'short_name': self.short_name,
-            'port': self.port,
-            'lp_port': self.lp_port,
-        }
-        nginx_config = self.pool['ir.ui.view'].render(
-            self.env.cr, self.env.user.id,
-            'runbot.nginx_template', values=ngx_build)
-        open(os.path.join(self.repo_id.root(), 'nginx/%s.conf' % self.short_name),
-             'w+').write(nginx_config)
-        nginx = subprocess.Popen(['/etc/init.d/nginx', 'reload'])
-        nginx.wait()
 
     def get_open_port(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
