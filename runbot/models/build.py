@@ -275,8 +275,13 @@ class Build(models.Model):
 
         _logger.info('Configuring nginx')
         # I like this solution so I copied from odoo ;)
+        ngx_build = {
+            'short_name': self.short_name,
+            'port': self.port,
+            'lp_port': self.lp_port,
+        }
         nginx_config = self.env['ir.ui.view'].render(
-            'runbot.nginx_config', self)
+            'runbot.nginx_config', ngx_build)
         open(os.path.join('../nginx/', '%s.conf' % self.short_name),
              'w').write(nginx_config)
         nginx = subprocess.Popen(['/etc/init.d/nginx', 'reload'])
