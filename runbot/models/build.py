@@ -197,6 +197,14 @@ class Build(models.Model):
         state = psutil.pid_exists(odoo_server.pid) and 'running' or 'stopped'
 
         _logger.info('Configuring nginx')
+        self.write({
+            'pid': odoo_server.pid,
+            'port': odoo_port,
+            'lp_port': lp_port,
+            'state': state,
+            'last_state_since': fields.Datetime.now(),
+        })
+        
         # I like this solution so I copied it from odoo ;)
         ngx_build = {
             'short_name': self.short_name,
@@ -214,13 +222,6 @@ class Build(models.Model):
         nginx = subprocess.Popen(['sudo', '/etc/init.d/nginx', 'reload'])
         nginx.wait()
 
-        self.write({
-            'pid': odoo_server.pid,
-            'port': odoo_port,
-            'lp_port': lp_port,
-            'state': state,
-            'last_state_since': fields.Datetime.now(),
-        })
 
         return True
 
