@@ -133,7 +133,7 @@
                                                                             <i class="ion-ios-refresh-empty"></i>
                                                                         </a>
                                                                         <span class="info-box-icon bg-yellow disabled" t-if="build.state in ['scheduled', 'creation', 'installing']">
-                                                                            <i class="fa fa-hourglass-start"></i>
+                                                                            <i class="ion-ios-gear-outline fa-spin"></i>
                                                                         </span>
                                                                         <div class="info-box-content">
                                                                             <a t-attf-href="/runbot/#{'build/%s' % slug(build)}"><span class="info-box-text">#<t t-esc="build.id"/></span></a>
