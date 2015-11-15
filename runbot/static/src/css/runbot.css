@@ -9,6 +9,8 @@
 .info-box-icon {
     width: 60px !important;
     font-size: 30px !important;
+    height: 97px !important;
+    line-height: 97px !important;
 }
 
 .info-box-content {
