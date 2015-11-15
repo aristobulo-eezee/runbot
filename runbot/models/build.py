@@ -107,7 +107,7 @@ class Build(models.Model):
             'state': 'installing',
             'last_state_since': fields.Datetime.now(), })
         self.env.cr.commit()
-        
+
         runbot_cfg = self.read_json()
 
         if self.pid and psutil.pid_exists(self.pid):
