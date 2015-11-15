@@ -281,7 +281,7 @@ class Build(models.Model):
             'lp_port': self.lp_port,
         }
         nginx_config = self.env['ir.ui.view'].render(
-            'runbot.nginx_template', ngx_build)
+            'runbot.nginx_template', values=ngx_build)
         open(os.path.join('../nginx/', '%s.conf' % self.short_name),
              'w').write(nginx_config)
         nginx = subprocess.Popen(['/etc/init.d/nginx', 'reload'])
