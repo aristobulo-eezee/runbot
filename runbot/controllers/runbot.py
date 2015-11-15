@@ -23,6 +23,7 @@ from openerp.addons.website.models.website import slug
 
 import logging
 import socket
+from ago import human
 
 
 _logger = logging.getLogger(__name__)
@@ -89,6 +90,7 @@ class RunbotController(http.Controller):
             ('repo_id', '=', repo.id)]).sorted(
             key=lambda r: r not in r.repo_id.sticky_branch_ids)
         context = {
+            'time_ago': human,
             'fqdn': socket.getfqdn(),
             'repo': repo,
             'branches': branches,
