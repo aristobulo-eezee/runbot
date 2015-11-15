@@ -96,13 +96,18 @@ class Build(models.Model):
                 'port': None,
                 'lp_port': None,
                 'pid': None,
-                'state': 'killed'})
+                'state': 'killed',
+                'last_state_since': fields.Datetime.now(), })
         return True
 
     @api.multi
     def install_server(self):
         self.ensure_one()
-        self.state = 'installing'
+        self.write({
+            'state': 'installing',
+            'last_state_since': fields.Datetime.now(), })
+        self.env.cr.commit()
+        
         runbot_cfg = self.read_json()
 
         if self.pid and psutil.pid_exists(self.pid):
@@ -190,12 +195,6 @@ class Build(models.Model):
         odoo_server = subprocess.Popen(cmd, env=venv)
         # Check if process is running
         state = psutil.pid_exists(odoo_server.pid) and 'running' or 'stopped'
-        self.write({
-            'pid': odoo_server.pid,
-            'port': odoo_port,
-            'lp_port': lp_port,
-            'state': state,
-        })
 
         _logger.info('Configuring nginx')
         # I like this solution so I copied it from odoo ;)
@@ -214,6 +213,14 @@ class Build(models.Model):
         # with sudo without being prompted for password
         nginx = subprocess.Popen(['sudo', '/etc/init.d/nginx', 'reload'])
         nginx.wait()
+
+        self.write({
+            'pid': odoo_server.pid,
+            'port': odoo_port,
+            'lp_port': lp_port,
+            'state': state,
+            'last_state_since': fields.Datetime.now(),
+        })
 
         return True
 
@@ -255,7 +262,10 @@ class Build(models.Model):
         """
         self.ensure_one()
         self.clean()
-        self.state = 'creation'
+        self.write({
+            'state': 'creation',
+            'last_state_since': fields.Datetime.now(), })
+        self.env.cr.commit()
 
         _logger.info('Preparing build: %s' % self.short_name)
         if not os.path.exists(self.env_dir):
