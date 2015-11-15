@@ -227,6 +227,9 @@ class Build(models.Model):
         _logger.info('Preparing build: %s' % self.short_name)
         if not os.path.exists(self.env_dir):
             virtualenv.create_environment(self.env_dir)
+        if not os.path.exists(os.path.join(self.repo_id.root(), 'nginx/')):
+            virtualenv.create_environment(
+                os.path.join(self.repo_id.root(), 'nginx/'))
         if not os.path.exists(self.parts_dir):
             os.makedirs(self.parts_dir)
         if not os.path.exists(self.env_dir+'/logs'):
