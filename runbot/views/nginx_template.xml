@@ -2,19 +2,19 @@
 <openerp>
     <data>
         <template id="nginx_template">
-upstream <t t-esc="build.short_name"/> {
-    server 127.0.0.1:<t t-esc="build.port"/> weight=1 fail_timeout=300s;
+upstream <t t-esc="short_name"/> {
+    server 127.0.0.1:<t t-esc="port"/> weight=1 fail_timeout=300s;
 }
-upstream <t t-esc="build.short_name"/>-longpolling {
-    server 127.0.0.1:<t t-esc="build.lp_port"/> weight=1 fail_timeout=300s;
+upstream <t t-esc="short_name"/>-longpolling {
+    server 127.0.0.1:<t t-esc="lp_port"/> weight=1 fail_timeout=300s;
 }
 
 server {
     listen 80;
-    server_name ~^<t t-esc="build.short_name"/>[-.].*$;;
+    server_name ~^<t t-esc="short_name"/>[-.].*$;;
 
     location / {
-        proxy_pass http://<t t-esc="build.short_name"/>;
+        proxy_pass http://<t t-esc="short_name"/>;
         # force timeouts if the backend dies
         proxy_next_upstream error timeout invalid_header http_500 http_502 http_503;
 
@@ -38,11 +38,11 @@ server {
         proxy_cache_valid 200 60m;
         proxy_buffering on;
         expires 864000;
-        proxy_pass http://<t t-esc="build.short_name"/>;
+        proxy_pass http://<t t-esc="short_name"/>;
     }
 
     location /longpolling/ {
-       proxy_pass http://<t t-esc="build.short_name"/>-longpolling;
+       proxy_pass http://<t t-esc="short_name"/>-longpolling;
     }
 }
         </template>
