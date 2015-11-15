@@ -273,6 +273,15 @@ class Build(models.Model):
             '--template=template0', self.short_name], env=venv)
         createdb.wait()
 
+        _logger.info('Configuring nginx')
+        # I like this solution so I copied from odoo ;)
+        nginx_config = self.env['ir.ui.view'].render(
+            'runbot.nginx_config', self)
+        open(os.path.join('../nginx/', '%s.conf' % self.short_name),
+             'w').write(nginx_config)
+        nginx = subprocess.Popen(['/etc/init.d/nginx', 'reload'])
+        nginx.wait()
+
     def get_open_port(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.bind(('', 0))
