@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <template id="nginx_template">
+upstream <t t-esc="build.short_name"/> {
+    server 127.0.0.1:<t t-esc="build.port"/> weight=1 fail_timeout=300s;
+}
+upstream <t t-esc="build.short_name"/>-longpolling {
+    server 127.0.0.1:<t t-esc="build.lp_port"/> weight=1 fail_timeout=300s;
+}
+
+server {
+    listen 80;
+    server_name ~^<t t-esc="build.short_name"/>[-.].*$;;
+
+    location / {
+        proxy_pass http://<t t-esc="build.short_name"/>;
+        # force timeouts if the backend dies
+        proxy_next_upstream error timeout invalid_header http_500 http_502 http_503;
+
+        # set headers
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Server $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forward-For $proxy_add_x_forwarded_for;
+
+        # Let the OpenERP web service know that we're using HTTPS, otherwise
+        # it will generate URL using http:// and not https://
+        proxy_set_header X-Forwarded-Proto https;
+
+        # by default, do not forward anything
+        proxy_redirect off;
+    }
+
+    # cache some static data in memory for 60mins.
+    # under heavy load this should relieve stress on the OpenERP web interface a bit.
+    location ~* /web/static/ {
+        proxy_cache_valid 200 60m;
+        proxy_buffering on;
+        expires 864000;
+        proxy_pass http://<t t-esc="build.short_name"/>;
+    }
+
+    location /longpolling/ {
+       proxy_pass http://<t t-esc="build.short_name"/>-longpolling;
+    }
+}
+        </template>
+    </data>
+</openerp>
