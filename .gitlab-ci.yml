@@ -2,21 +2,24 @@ variables:
   PROJECT_MODULES: "runbot"
   ODOO_VERSION: "9.0"
 
-before_script:
-  - dropdb --if-exists $CI_BUILD_REF
 stages:
   - check
   - build
   - clean
 
 flake8:
+  tags:
+    - flake8
   stage: check
   script:
   - flake8 --config=flake8.cfg .
 
 tests:
+  tags:
+    - odoo
   stage: build
   script:
+  - dropdb --if-exists $CI_BUILD_REF
   - virtualenv env
   - source env/bin/activate
   - pip install -r requirements.txt
