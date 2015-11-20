@@ -20,7 +20,7 @@
                             <field name="active"/>
                             <field name="odoo_repo"/>
                             <field name="alias"/>
-                            <field name="git_host"/>
+                            <field name="provider"/>
                             <field name="token" readonly="1"/>
                         </group>
                         <group string="Sticky branches">
@@ -57,7 +57,7 @@
                 <tree string="Repositories">
                     <field name="active"/>
                     <field name="name"/>
-                    <field name="git_host"/>
+                    <field name="provider"/>
                     <field name="published"/>
                 </tree>
             </field>

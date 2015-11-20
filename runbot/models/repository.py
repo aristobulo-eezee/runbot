@@ -40,15 +40,9 @@ class Repository(models.Model):
     name = fields.Char('Repository', required=True)
     published = fields.Boolean('Available on website', default=False,
                                copy=False)
-    git_host = fields.Selection([
-        ('local', _('Local')),
-        ('github', _('Github')),
-        ('bitbucket', _('Bitbucket')),
-        ('gitlab', _('Gitlab')),
-    ], string='Hosting', required=True,
-        default='github',
-        help='Provider where git repository is hosted. Local means git '
-             'repository is located on the same filesystem as runbot.')
+    provider = fields.Selection(
+        old_name='git_host', selection=[], string='Provider',
+        help='Provider where git repository is hosted.')
     branch_ids = fields.One2many('runbot.branch', 'repo_id', string='Branches')
     sticky_branch_ids = fields.Many2many(
         'runbot.branch', string='Sticky branches', copy=False)
@@ -198,3 +192,15 @@ class Repository(models.Model):
     def repo_publish_button(self):
         for repo in self:
             repo.published = not repo.published
+
+    @api.model
+    def process_push_hook(self, token, request):
+        """
+        This method will be void, has to be implemented on a separated module
+        for each service supported (BitBucket, Github, Gitlab, Etc.)
+        :param token:
+        :param request:
+        :return:
+        """
+        raise Warning(_('Not implemented yet. Please install one of runbot '
+                        'providers modules.'))

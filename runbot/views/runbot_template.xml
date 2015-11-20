@@ -64,10 +64,7 @@
                                                    <a t-attf-href="/runbot/#{'repo/%s' % slug(repo)}"><span t-field="repo.name" /></a>
                                                 </td>
                                                 <td>
-                                                    <i class="fa fa-github" t-if="repo.git_host =='github'"/>
-                                                    <i class="fa fa-bitbucket" t-if="repo.git_host =='bitbucket'"/>
-                                                    <i class="fa fa-git" t-if="repo.git_host not in ['bitbucket', 'github']"/>
-                                                    <span t-field="repo.git_host" />
+                                                    <span id="provider" t-field="repo.provider" />
                                                 </td>
                                             </tr>
                                         </t>
