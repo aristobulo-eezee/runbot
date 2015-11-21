@@ -204,12 +204,16 @@ class Repository(models.Model):
         :return:
         """
         try:
+            repo = self.sudo().search([('token', '=', token)], limit=1)
+            if not repo:
+                _logger.info('Token is not valid.')
+                return
             func_process = getattr(self,
-                                   '%s_process_push_hook' % self.provider)
-            func_process(self, token, request)
+                                   '%s_process_push_hook' % repo.provider)
+            func_process(repo, token, request)
         except AttributeError:
             raise Warning(_('Not implemented yet. Please install one of runbot'
-                            'providers modules.'))
+                            ' providers modules.'))
 
     @api.model
     def process_build_hook(self, token, request):
@@ -221,9 +225,13 @@ class Repository(models.Model):
         :return:
         """
         try:
+            repo = self.sudo().search([('token', '=', token)], limit=1)
+            if not repo:
+                _logger.info('Token is not valid.')
+                return
             func_process = getattr(self,
-                                   '%s_process_build_hook' % self.ci_service)
-            func_process(self, token, request)
+                                   '%s_process_build_hook' % repo.ci_service)
+            func_process(repo, token, request)
         except AttributeError:
             raise Warning(_('Not implemented yet. Please install one of runbot'
-                            'providers modules.'))
+                            ' providers modules.'))

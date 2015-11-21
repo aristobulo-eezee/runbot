@@ -87,19 +87,19 @@ class Repository(models.Model):
                 raise Warning(_('Couldn\'t get commit from Gitlab Server'))
         return False
 
-    @api.model
+    @api.multi
     def gitlab_process_push_hook(self, token, request):
+        self.ensure_one()
         _logger.info('Processing Gitlab push hook...')
-        repo = self.sudo().search([('token', '=', token)], limit=1)
-        prj_id = repo.gitlab_get_project_id()
+        prj_id = self.gitlab_get_project_id()
         commit = self.gitlab_get_commit(request['commits'][0]['id'])
-        if repo and prj_id == request.get('project_id', None) and commit:
+        if self and prj_id == request.get('project_id', None) and commit:
             _logger.info('Token accepted, preparing build.')
             branch = self.env['runbot.branch'].sudo().search([
                 ('ref_name', '=', request['ref']),
-                ('repo_id', '=', repo.id)], limit=1)
+                ('repo_id', '=', self.id)], limit=1)
             build = self.env['runbot.build'].sudo().search([
-                ('repo_id.id', '=', repo.id),
+                ('repo_id.id', '=', self.id),
                 ('branch_id.ref_name', '=', request['ref']),
                 ('commit', '=', commit['id'])], limit=1)
             if not build:
