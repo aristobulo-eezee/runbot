@@ -53,7 +53,7 @@ etc.).
 For private repositories you need to use your repo's ssh url.
 
 
-### What's differente on this runbot?
+### What's different on this runbot?
 
 **This is not a fork of Odoo's runbot**, this was written from scratch. It works
 on Odoo v9 (it should also run on v8) and uses default Python libraries to
