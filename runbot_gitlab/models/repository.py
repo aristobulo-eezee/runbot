@@ -94,6 +94,8 @@ class Repository(models.Model):
         commit = self.gitlab_get_commit(request['commits'][0]['id'])
         if self and prj_id == request.get('project_id', None) and commit:
             _logger.info('Token accepted, preparing build.')
+            # TODO: This way to update repo has to be improved
+            self.clone(branch=request['ref'][len('refs/heads/'):])
             branch = self.env['runbot.branch'].sudo().search([
                 ('ref_name', '=', request['ref']),
                 ('repo_id', '=', self.id)], limit=1)
@@ -122,6 +124,8 @@ class Repository(models.Model):
                 request.get('project_id', None)) and \
                 status == 'success':
             _logger.info('Token accepted, preparing build.')
+            # TODO: This way to update repo has to be improved
+            self.clone(branch=request['ref'])
             branch = self.env['runbot.branch'].sudo().search([
                 ('name', '=', request['ref']),
                 ('repo_id', '=', self.id)], limit=1)
