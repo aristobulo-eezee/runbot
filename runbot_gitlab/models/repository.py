@@ -89,6 +89,7 @@ class Repository(models.Model):
 
     @api.model
     def gitlab_process_push_hook(self, token, request):
+        _logger.info('Processing Gitlab push hook...')
         repo = self.sudo().search([('token', '=', token)], limit=1)
         prj_id = repo.gitlab_get_project_id()
         commit = self.gitlab_get_commit(request['commits'][0]['id'])
@@ -112,6 +113,7 @@ class Repository(models.Model):
 
     @api.model
     def gitlab_ci_process_build_hook(self, token, request):
+        _logger.info('Processing Gitlab CI build hook...')
         repo = self.sudo().search([('token', '=', token)], limit=1)
         prj_id = repo.gitlab_get_project_id()
         commit = self.gitlab_get_commit(request['sha'])
