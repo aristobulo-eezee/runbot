@@ -66,6 +66,7 @@ class Repository(models.Model):
                                  prj['http_url_to_repo']]:
                     return prj['id']
         except ValueError:
+            _logger.info(_('Couldn\'t get project from Gitlab Server'))
             raise Warning(_('Couldn\'t get project from Gitlab Server'))
         return False
 
@@ -82,6 +83,7 @@ class Repository(models.Model):
                 response = r.json()
                 return response
             except ValueError:
+                _logger.info(_('Couldn\'t get commit from Gitlab Server'))
                 raise Warning(_('Couldn\'t get commit from Gitlab Server'))
         return False
 
@@ -91,6 +93,7 @@ class Repository(models.Model):
         prj_id = repo.gitlab_get_project_id()
         commit = self.gitlab_get_commit(request['commits'][0]['id'])
         if repo and prj_id == request.get('project_id', None) and commit:
+            _logger.info('Token accepted, preparing build.')
             branch = self.env['runbot.branch'].sudo().search([
                 ('ref_name', '=', request['ref']),
                 ('repo_id', '=', repo.id)], limit=1)
@@ -115,6 +118,7 @@ class Repository(models.Model):
         status = commit and commit['status']
         if repo and prj_id == request.get('project_id', None) and \
                 status == 'success':
+            _logger.info('Token accepted, preparing build.')
             branch = self.env['runbot.branch'].sudo().search([
                 ('ref_name', '=', request['ref']),
                 ('repo_id', '=', repo.id)], limit=1)
