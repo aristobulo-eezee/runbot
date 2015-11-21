@@ -92,7 +92,7 @@ class Repository(models.Model):
     @api.multi
     def github_process_push_hook(self, token, request):
         self.ensure_one()
-        gh_repo = repo.github_get_repo()
+        gh_repo = self.github_get_repo()
         commit = self.github_get_commit(request['commits'][0]['sha'])
         if self and gh_repo == request['repository']['full_name'] and commit:
             branch = self.env['runbot.branch'].sudo().search([
