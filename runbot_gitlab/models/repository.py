@@ -109,22 +109,22 @@ class Repository(models.Model):
         _logger.info('Couldn\'t process webhook from Gitlab server!')
         return False
 
-    @api.model
+    @api.multi
     def gitlab_ci_process_build_hook(self, token, request):
+        self.ensure_one()
         _logger.info('Processing Gitlab CI build hook...')
-        repo = self.sudo().search([('token', '=', token)], limit=1)
-        prj_id = repo.gitlab_get_project_id()
+        prj_id = self.gitlab_get_project_id()
         commit = self.gitlab_get_commit(request['sha'])
         status = commit and commit['status']
         _logger.info('Gitlab CI build status: %s', status)
-        if repo and prj_id == request.get('project_id', None) and \
+        if self and prj_id == request.get('project_id', None) and \
                 status == 'success':
             _logger.info('Token accepted, preparing build.')
             branch = self.env['runbot.branch'].sudo().search([
                 ('ref_name', '=', request['ref']),
-                ('repo_id', '=', repo.id)], limit=1)
+                ('repo_id', '=', self.id)], limit=1)
             build = self.env['runbot.build'].sudo().search([
-                ('repo_id.id', '=', repo.id),
+                ('repo_id.id', '=', self.id),
                 ('branch_id.ref_name', '=', request['ref']),
                 ('commit', '=', commit['id'])], limit=1)
             if not build:
@@ -133,5 +133,4 @@ class Repository(models.Model):
                     'branch_id': branch.id,
                 })
             return build
-        _logger.info('Couldn\'t process webhook from Gitlab CI server!')
         return False
