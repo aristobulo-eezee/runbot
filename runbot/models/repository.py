@@ -208,9 +208,9 @@ class Repository(models.Model):
             if not repo:
                 _logger.info('Token is not valid.')
                 return
-            func_process = getattr(self,
+            func_process = getattr(repo,
                                    '%s_process_push_hook' % repo.provider)
-            func_process(repo, token, request)
+            func_process(token, request)
         except AttributeError:
             raise Warning(_('Not implemented yet. Please install one of runbot'
                             ' providers modules.'))
@@ -229,9 +229,9 @@ class Repository(models.Model):
             if not repo:
                 _logger.info('Token is not valid.')
                 return
-            func_process = getattr(self,
+            func_process = getattr(repo,
                                    '%s_process_build_hook' % repo.ci_service)
-            func_process(repo, token, request)
+            func_process(token, request)
         except AttributeError:
             raise Warning(_('Not implemented yet. Please install one of runbot'
                             ' providers modules.'))

@@ -89,17 +89,17 @@ class Repository(models.Model):
                 raise Warning(_('Couldn\'t get commit from Github Server'))
         return False
 
-    @api.model
+    @api.multi
     def github_process_push_hook(self, token, request):
-        repo = self.sudo().search([('token', '=', token)], limit=1)
+        self.ensure_one()
         gh_repo = repo.github_get_repo()
         commit = self.github_get_commit(request['commits'][0]['sha'])
-        if repo and gh_repo == request['repository']['full_name'] and commit:
+        if self and gh_repo == request['repository']['full_name'] and commit:
             branch = self.env['runbot.branch'].sudo().search([
                 ('ref_name', '=', request['ref']),
-                ('repo_id', '=', repo.id)], limit=1)
+                ('repo_id', '=', self.id)], limit=1)
             build = self.env['runbot.build'].sudo().search([
-                ('repo_id.id', '=', repo.id),
+                ('repo_id.id', '=', self.id),
                 ('branch_id.ref_name', '=', request['ref']),
                 ('commit', '=', commit['id'])], limit=1)
             if not build:
