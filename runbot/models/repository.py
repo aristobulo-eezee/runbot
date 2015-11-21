@@ -123,17 +123,19 @@ class Repository(models.Model):
                 git.fetch()
             else:
                 # Get sources from bare repo
-                bare = Repo(self.get_dir())
-                git = bare.git
+                repo = Repo(self.get_dir())
+                git = repo.git
                 _logger.info('Fetching %s.' % self.name)
                 git.fetch('origin', '%s:%s' % (branch, branch))
-                _logger.info('Cloning repo: %s to: %s.' % (self.name, to_path))
-                repo = Repo.clone_from(
-                    self.get_dir(), to_path=to_path, branch=branch)
-                if commit:
-                    repo.commit(commit)
-                for submodule in repo.submodules:
-                        submodule.update(init=True)
+                if to_path:
+                    _logger.info('Cloning repo: %s to: %s.' % (
+                        self.name, to_path))
+                    repo = Repo.clone_from(
+                        self.get_dir(), to_path=to_path, branch=branch)
+                    if commit:
+                        repo.commit(commit)
+                    for submodule in repo.submodules:
+                            submodule.update(init=True)
             heads = []
             tags = []
             for ref in repo.references:
