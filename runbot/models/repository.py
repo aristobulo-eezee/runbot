@@ -194,7 +194,7 @@ class Repository(models.Model):
         for repo in self:
             repo.published = not repo.published
 
-    @api.multi
+    @api.model
     def process_push_hook(self, token, request):
         """
         This method will be void, has to be implemented on a separated module
@@ -203,7 +203,6 @@ class Repository(models.Model):
         :param request:
         :return:
         """
-        self.ensure_one()
         try:
             func_process = getattr(self,
                                    '%s_process_push_hook' % self.provider)
@@ -212,7 +211,7 @@ class Repository(models.Model):
             raise Warning(_('Not implemented yet. Please install one of runbot'
                             'providers modules.'))
 
-    @api.multi
+    @api.model
     def process_build_hook(self, token, request):
         """
         This method will be void, has to be implemented on a separated module
@@ -221,7 +220,6 @@ class Repository(models.Model):
         :param request:
         :return:
         """
-        self.ensure_one()
         try:
             func_process = getattr(self,
                                    '%s_process_build_hook' % self.ci_service)
