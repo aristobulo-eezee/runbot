@@ -10,5 +10,14 @@
             <field name="key">gitlab.url</field>
             <field name="value">https://gitlab.com</field>
         </record>
+        <record id="gitlab_ci_token" model="ir.config_parameter">
+            <field name="key">gitlab.ci.token</field>
+            <field name="value">put_your_token_here!</field>
+        </record>
+
+        <record id="gitlab_ci_url" model="ir.config_parameter">
+            <field name="key">gitlab.ci.url</field>
+            <field name="value">https://ci.gitlab.com</field>
+        </record>
     </data>
 </openerp>

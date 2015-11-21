@@ -26,6 +26,7 @@ import logging
 _logger = logging.getLogger(__name__)
 
 GITLAB_API = '/api/v3'
+GITLAB_CI_API = '/api/v1'
 
 
 class Repository(models.Model):
@@ -38,19 +39,19 @@ class Repository(models.Model):
 
     @api.model
     def get_gitlab_token(self):
-        token_param = self.env['ir.config_parameter'].sudo().search([
+        param = self.env['ir.config_parameter'].sudo().search([
             ('key', '=', 'gitlab.token')], limit=1)
-        if not token_param:
+        if not param:
             raise Warning(_('Missing "gitlab.token" system parameter!'))
-        return token_param.value
+        return param.value
 
     @api.model
     def get_gitlab_url(self):
-        token_param = self.env['ir.config_parameter'].sudo().search([
+        param = self.env['ir.config_parameter'].sudo().search([
             ('key', '=', 'gitlab.url')], limit=1)
-        if not token_param:
+        if not param:
             raise Warning(_('Missing "gitlab.url" system parameter!'))
-        return token_param.value
+        return param.value
 
     @api.multi
     def gitlab_get_project_id(self):
@@ -117,7 +118,8 @@ class Repository(models.Model):
         commit = self.gitlab_get_commit(request['sha'])
         status = commit and commit['status']
         _logger.info('Gitlab CI build status: %s', status)
-        if self and prj_id == request.get('project_id', None) and \
+        if prj_id == self.gitlab_ci_get_gitlab_project_id(
+                request.get('project_id', None)) and \
                 status == 'success':
             _logger.info('Token accepted, preparing build.')
             branch = self.env['runbot.branch'].sudo().search([
@@ -133,4 +135,34 @@ class Repository(models.Model):
                     'branch_id': branch.id,
                 })
             return build
+        return False
+
+    @api.model
+    def get_gitlab_ci_token(self):
+        param = self.env['ir.config_parameter'].sudo().search([
+            ('key', '=', 'gitlab.ci.token')], limit=1)
+        if not param:
+            raise Warning(_('Missing "gitlab.ci.token" system parameter!'))
+        return param.value
+
+    @api.model
+    def get_gitlab_ci_url(self):
+        param = self.env['ir.config_parameter'].sudo().search([
+            ('key', '=', 'gitlab.ci.url')], limit=1)
+        if not param:
+            raise Warning(_('Missing "gitlab.ci.url" system parameter!'))
+        return param.value
+
+    @api.multi
+    def gitlab_ci_get_gitlab_project_id(self, prj_id):
+        self.ensure_one()
+        payload = {'private_token': self.get_gitlab_ci_token()}
+        endpoint = '/projects/%id' % prj_id
+        r = requests.get('%s%s%s' % (self.get_gitlab_ci_url(), GITLAB_CI_API,
+                                     endpoint), params=payload)
+        try:
+            response = r.json()
+            return response['gitlab_id']
+        except ValueError:
+            raise Warning(_('Couldn\'t get project from Gitlab CI Server'))
         return False
