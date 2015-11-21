@@ -43,6 +43,7 @@ class Repository(models.Model):
     provider = fields.Selection(
         old_name='git_host', selection=[], string='Provider',
         help='Provider where git repository is hosted.')
+    ci_service = fields.Selection(selection=[], string='CI Service')
     branch_ids = fields.One2many('runbot.branch', 'repo_id', string='Branches')
     sticky_branch_ids = fields.Many2many(
         'runbot.branch', string='Sticky branches', copy=False)
@@ -193,7 +194,7 @@ class Repository(models.Model):
         for repo in self:
             repo.published = not repo.published
 
-    @api.model
+    @api.multi
     def process_push_hook(self, token, request):
         """
         This method will be void, has to be implemented on a separated module
@@ -202,5 +203,29 @@ class Repository(models.Model):
         :param request:
         :return:
         """
-        raise Warning(_('Not implemented yet. Please install one of runbot '
-                        'providers modules.'))
+        self.ensure_one()
+        try:
+            func_process = getattr(self,
+                                   '%s_process_push_hook' % self.provider)
+            func_process(self, token, request)
+        except AttributeError:
+            raise Warning(_('Not implemented yet. Please install one of runbot'
+                            'providers modules.'))
+
+    @api.multi
+    def process_build_hook(self, token, request):
+        """
+        This method will be void, has to be implemented on a separated module
+        for each service supported (BitBucket, Github, Gitlab, Etc.)
+        :param token:
+        :param request:
+        :return:
+        """
+        self.ensure_one()
+        try:
+            func_process = getattr(self,
+                                   '%s_process_build_hook' % self.ci_service)
+            func_process(self, token, request)
+        except AttributeError:
+            raise Warning(_('Not implemented yet. Please install one of runbot'
+                            'providers modules.'))

@@ -45,6 +45,7 @@ class Build(models.Model):
         ('creation', _('Creation')),
         ('installing', _('Installing')),
         ('running', _('Running')),
+        ('failed', _('Failed')),
         ('killed', _('Killed')),
         ('stopped', _('Stopped')), ], string='Status', default='scheduled')
     last_state_since = fields.Datetime(
