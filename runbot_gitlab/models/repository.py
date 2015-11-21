@@ -123,7 +123,7 @@ class Repository(models.Model):
                 status == 'success':
             _logger.info('Token accepted, preparing build.')
             branch = self.env['runbot.branch'].sudo().search([
-                ('ref_name', '=', request['ref']),
+                ('name', '=', request['ref']),
                 ('repo_id', '=', self.id)], limit=1)
             build = self.env['runbot.build'].sudo().search([
                 ('repo_id.id', '=', self.id),
