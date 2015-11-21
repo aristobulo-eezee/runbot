@@ -1,3 +1,5 @@
+[![build status](https://gitlab.com/ci/projects/19298/status.png?ref=master)](https://gitlab.com/ci/projects/19298?ref=master)
+
 RUNBOT
 ======
 
@@ -23,8 +25,12 @@ Example:
   "odoo": "9.0",
   "without-demo": "all",
   "addons": {
-    "path": [""],
+    "path": ["addons"],
     "install": ["runbot"]
+  },
+  "enterprise": {
+    "branch": "9.0",
+    "repo": "git@host:odoo/enterprise.git"
   }
 }
 ```
@@ -64,4 +70,3 @@ repositories and builds.
 
 Control, from Odoo's backend you can control each build. It has 'Rebuild',
 'Kill' and 'Start' actions.
-
