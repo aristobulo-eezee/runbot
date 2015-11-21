@@ -58,6 +58,7 @@
                     <field name="active"/>
                     <field name="name"/>
                     <field name="provider"/>
+                    <field name="ci_service"/>
                     <field name="published"/>
                 </tree>
             </field>
