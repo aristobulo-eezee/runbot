@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="1">
+        <record id="github_username" model="ir.config_parameter">
+            <field name="key">github.username</field>
+            <field name="value">put_your_username_here!</field>
+        </record>
+
+        <record id="github_personal_token" model="ir.config_parameter">
+            <field name="key">github.token</field>
+            <field name="value">put_your_token_here!</field>
+        </record>
+
+        <record id="github_url" model="ir.config_parameter">
+            <field name="key">github.url</field>
+            <field name="value">https://api.github.com</field>
+        </record>
+    </data>
+</openerp>
