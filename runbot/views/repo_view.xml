@@ -21,6 +21,7 @@
                             <field name="odoo_repo"/>
                             <field name="alias"/>
                             <field name="provider"/>
+                            <field name="ci_service"/>
                             <field name="token" readonly="1"/>
                         </group>
                         <group string="Sticky branches">
