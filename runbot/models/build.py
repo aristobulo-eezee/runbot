@@ -123,6 +123,11 @@ class Build(models.Model):
         _logger.info('Installing odoo server.')
 
         # Prepare command
+        pg_username = self.env.ref('runbot.pg_username').value
+        pg_password = self.env.ref('runbot.pg_password').value
+        pg_host = self.env.ref('runbot.pg_host').value
+        pg_port = self.env.ref('runbot.pg_port').value
+
         addons_path = '--addons-path='
         if runbot_cfg.get('enterprise', False):
             addons_path = '%s%s/enterprise,' % (addons_path, self.parts_dir)
@@ -130,6 +135,10 @@ class Build(models.Model):
             '%s/bin/python' % self.env_dir,
             '%s/openerp-server' % self.odoo_dir,
             '--db-filter', '%s.*$' % self.short_name,
+            '-r', pg_username,
+            '-w', pg_password,
+            '--db_host', pg_host,
+            '--db_port', pg_port,
             '%s%s/addons,%s' % (
                 addons_path,
                 self.odoo_dir,
@@ -174,6 +183,11 @@ class Build(models.Model):
         _logger.info('Starting odoo server.')
 
         # Prepare command
+        pg_username = self.env.ref('runbot.pg_username').value
+        pg_password = self.env.ref('runbot.pg_password').value
+        pg_host = self.env.ref('runbot.pg_host').value
+        pg_port = self.env.ref('runbot.pg_port').value
+
         addons_path = '--addons-path='
         if runbot_cfg.get('enterprise', False):
             addons_path = '%s%s/enterprise,' % (addons_path, self.parts_dir)
@@ -181,6 +195,10 @@ class Build(models.Model):
             '%s/bin/python' % self.env_dir,
             '%s/openerp-server' % self.odoo_dir,
             '--db-filter', '%s.*$' % self.short_name,
+            '-r', pg_username,
+            '-w', pg_password,
+            '--db_host', pg_host,
+            '--db_port', pg_port,
             '%s%s/addons,%s' % (
                 addons_path,
                 self.odoo_dir,
