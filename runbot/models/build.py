@@ -315,7 +315,6 @@ class Build(models.Model):
             'last_state_since': fields.Datetime.now(), })
         self.env.cr.commit()
 
-
         _logger.info('Cloning %s' % self.branch_id.name)
         self.repo_id.clone(branch=self.branch_id.name, to_path=self.custom_dir,
                            commit=self.commit)
