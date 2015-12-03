@@ -289,6 +289,8 @@ class Build(models.Model):
         """
         self.ensure_one()
 
+        self.clean()
+
         _logger.info('Preparing build: %s' % self.short_name)
         if not os.path.exists(self.env_dir):
             virtualenv.create_environment(self.env_dir)
@@ -313,7 +315,6 @@ class Build(models.Model):
             self.env.cr.commit()
             return False
 
-        self.clean()
         self.write({
             'state': 'creation',
             'last_state_since': fields.Datetime.now(), })
