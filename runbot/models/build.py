@@ -300,6 +300,10 @@ class Build(models.Model):
         if not os.path.exists(self.env_dir+'/logs'):
             os.makedirs(self.env_dir+'/logs')
 
+        _logger.info('Cloning %s' % self.branch_id.name)
+        self.repo_id.clone(branch=self.branch_id.name, to_path=self.custom_dir,
+                           commit=self.commit)
+
         runbot_cfg = self.read_json()
 
         if not runbot_cfg:
@@ -314,10 +318,6 @@ class Build(models.Model):
             'state': 'creation',
             'last_state_since': fields.Datetime.now(), })
         self.env.cr.commit()
-
-        _logger.info('Cloning %s' % self.branch_id.name)
-        self.repo_id.clone(branch=self.branch_id.name, to_path=self.custom_dir,
-                           commit=self.commit)
 
         _logger.info('Cloning odoo')
         odoo_repo = self.env['runbot.repo'].search([
