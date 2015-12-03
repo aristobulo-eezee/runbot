@@ -289,6 +289,17 @@ class Build(models.Model):
         """
         self.ensure_one()
 
+        _logger.info('Preparing build: %s' % self.short_name)
+        if not os.path.exists(self.env_dir):
+            virtualenv.create_environment(self.env_dir)
+        if not os.path.exists(os.path.join(self.repo_id.root(), 'nginx/')):
+            virtualenv.create_environment(
+                os.path.join(self.repo_id.root(), 'nginx/'))
+        if not os.path.exists(self.parts_dir):
+            os.makedirs(self.parts_dir)
+        if not os.path.exists(self.env_dir+'/logs'):
+            os.makedirs(self.env_dir+'/logs')
+
         runbot_cfg = self.read_json()
 
         if not runbot_cfg:
@@ -304,16 +315,6 @@ class Build(models.Model):
             'last_state_since': fields.Datetime.now(), })
         self.env.cr.commit()
 
-        _logger.info('Preparing build: %s' % self.short_name)
-        if not os.path.exists(self.env_dir):
-            virtualenv.create_environment(self.env_dir)
-        if not os.path.exists(os.path.join(self.repo_id.root(), 'nginx/')):
-            virtualenv.create_environment(
-                os.path.join(self.repo_id.root(), 'nginx/'))
-        if not os.path.exists(self.parts_dir):
-            os.makedirs(self.parts_dir)
-        if not os.path.exists(self.env_dir+'/logs'):
-            os.makedirs(self.env_dir+'/logs')
 
         _logger.info('Cloning %s' % self.branch_id.name)
         self.repo_id.clone(branch=self.branch_id.name, to_path=self.custom_dir,
