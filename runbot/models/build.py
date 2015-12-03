@@ -68,12 +68,7 @@ class Build(models.Model):
     @api.depends('commit', 'branch_id', 'branch_id.name', 'repo_id')
     def _compute_dirs(self):
         for build in self:
-            # TODO: make replacement cleaner
-            build.short_name = '%s-%s' % \
-                               (build.commit[:8],
-                                build.branch_id.name
-                                .replace('/', '-')
-                                .replace('.', '-'))
+            build.short_name = '%s-%s' % (build.commit[:8], build.id)
             build.env_dir = '%sbuild/%s' % (
                 build.repo_id.root(), build.short_name)
             build.parts_dir = '%s/parts' % build.env_dir
@@ -99,20 +94,31 @@ class Build(models.Model):
                 'pid': None,
                 'state': 'killed',
                 'last_state_since': fields.Datetime.now(), })
+            # Force to commit changes into db after every build killed
+            self.env.cr.commit()
         return True
 
     @api.multi
     def install_server(self):
         self.ensure_one()
+
+        if self.pid and psutil.pid_exists(self.pid):
+            return False
+
+        runbot_cfg = self.read_json()
+
+        if not runbot_cfg:
+            self.write({
+                'state': 'failed',
+                'last_state_since': fields.Datetime.now(), })
+            self.env.cr.commit()
+            return False
+
         self.write({
             'state': 'installing',
             'last_state_since': fields.Datetime.now(), })
         self.env.cr.commit()
 
-        runbot_cfg = self.read_json()
-
-        if self.pid and psutil.pid_exists(self.pid):
-            return False
         venv = os.environ.copy()
         _logger.info('Install odoo on build: %s' % self.short_name)
         _logger.info('Get open ports for odoo and longpolling.')
@@ -157,7 +163,6 @@ class Build(models.Model):
             odoo_server = subprocess.Popen(cmd_without_demo, env=venv)
             odoo_server.wait()
 
-        # Now install demo data
         odoo_server = subprocess.Popen(cmd, env=venv)
         odoo_server.wait()
 
@@ -167,13 +172,20 @@ class Build(models.Model):
     def start_server(self):
         """
         Run odoo build
-        :return: boolean
+        :return: False if couldn't run instance else True
         """
         self.ensure_one()
         runbot_cfg = self.read_json()
+        if not runbot_cfg:
+            self.write({
+                'state': 'failed',
+                'last_state_since': fields.Datetime.now(), })
+            self.env.cr.commit()
+            return False
 
         if self.pid and psutil.pid_exists(self.pid):
-            return False
+            return True
+
         venv = os.environ.copy()
         _logger.info('Starting build: %s' % self.short_name)
         _logger.info('Get open ports for odoo and longpolling.')
@@ -280,6 +292,16 @@ class Build(models.Model):
         :return:
         """
         self.ensure_one()
+
+        runbot_cfg = self.read_json()
+
+        if not runbot_cfg:
+            self.write({
+                'state': 'failed',
+                'last_state_since': fields.Datetime.now(), })
+            self.env.cr.commit()
+            return False
+
         self.clean()
         self.write({
             'state': 'creation',
@@ -300,8 +322,6 @@ class Build(models.Model):
         _logger.info('Cloning %s' % self.branch_id.name)
         self.repo_id.clone(branch=self.branch_id.name, to_path=self.custom_dir,
                            commit=self.commit)
-
-        runbot_cfg = self.read_json()
 
         _logger.info('Cloning odoo')
         odoo_repo = self.env['runbot.repo'].search([
@@ -387,6 +407,14 @@ class Build(models.Model):
         _logger.info('Scheduled: %s' % cron.name)
 
     def unlink(self, cr, uid, ids, context=None):
+        """
+        Kill process and clean db/fs and then unlink build
+        :param cr:
+        :param uid:
+        :param ids:
+        :param context:
+        :return:
+        """
         builds = self.browse(cr, uid, ids, context=context)
         for build in builds:
             build.kill()
@@ -401,6 +429,11 @@ class Build(models.Model):
 
     @api.multi
     def read_json(self):
+        """
+        Read runbot.json config file
+        :return: dict
+        """
+        # TODO: handle missing file or possible parsing errors
         self.ensure_one()
         with open(self.custom_dir+'/runbot.json') as data_file:
             config = json.load(data_file)
