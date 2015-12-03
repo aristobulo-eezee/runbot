@@ -132,6 +132,9 @@
                                                                         <span class="info-box-icon bg-yellow disabled" t-if="build.state in ['scheduled', 'creation', 'installing']">
                                                                             <i class="ion-ios-gear-outline fa-spin"></i>
                                                                         </span>
+                                                                        <span class="info-box-icon bg-red disabled" t-if="build.state == 'failed'">
+                                                                            <i class="ion-ios-close-outline"></i>
+                                                                        </span>
                                                                         <div class="info-box-content">
                                                                             <a t-attf-href="/runbot/#{'build/%s' % slug(build)}"><span class="info-box-text">#<t t-esc="build.id"/></span></a>
                                                                             <span class="info-box-number" t-field="build.short_name"/>
