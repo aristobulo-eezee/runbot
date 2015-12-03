@@ -56,7 +56,6 @@ class Build(models.Model):
         'runbot.repo', string='Repository', related='branch_id.repo_id',
         store=True)
     pid = fields.Integer(string='Process ID')
-    nginx_pid = fields.Integer(string='Nginx PID')
     port = fields.Integer(string='Port')
     lp_port = fields.Integer(string='Longpolling Port')
     env_dir = fields.Char(string='Virtualenv', compute='_compute_dirs')
@@ -238,14 +237,14 @@ class Build(models.Model):
         })
         self.env.cr.commit()
         # I like this solution so I copied it from odoo ;)
-        ngx_build = {
+        nginx_values = {
             'short_name': self.short_name,
             'port': self.port,
             'lp_port': self.lp_port,
         }
         nginx_config = self.pool['ir.ui.view'].render(
             self.env.cr, self.env.user.id,
-            'runbot.nginx_template', values=ngx_build)
+            'runbot.nginx_template', values=nginx_values)
         open(os.path.join(self.repo_id.root(),
                           'nginx/%s.conf' % self.short_name),
              'w+').write(nginx_config)
@@ -428,7 +427,7 @@ class Build(models.Model):
     def read_json(self):
         """
         Read runbot.json config file
-        :return: dict
+        :return: dict or False
         """
         self.ensure_one()
         try:

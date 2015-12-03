@@ -31,13 +31,13 @@ _logger = logging.getLogger(__name__)
 
 
 class RunbotController(http.Controller):
-    def time_ago(self, from_):
+    @staticmethod
+    def time_ago(from_):
         if from_ is None:
             from_ = Datetime.now()
         return human(Datetime.from_string(from_), 1)
 
-    @http.route('/runbot/webhook/push',
-                type='json', auth="none")
+    @http.route('/runbot/webhook/push', type='json', auth="none")
     def push_event(self, req):
         env = request.env
         json_dict = req.jsonrequest
@@ -48,8 +48,7 @@ class RunbotController(http.Controller):
             env['runbot.build'].sudo().schedule(build.id)
         return {}
 
-    @http.route('/runbot/webhook/build',
-                type='json', auth="none")
+    @http.route('/runbot/webhook/build', type='json', auth="none")
     def build_event(self, req):
         env = request.env
         json_dict = req.jsonrequest
