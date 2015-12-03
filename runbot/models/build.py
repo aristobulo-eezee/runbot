@@ -267,10 +267,7 @@ class Build(models.Model):
                 shutil.rmtree(build.env_dir, ignore_errors=True)
             _logger.info('Dropping database %s.' % self.short_name)
             dropdb = subprocess.Popen([
-                'dropdb',
-                '-U', 'odoo',
-                '--if-exists',
-                self.short_name])
+                'dropdb', '-U', 'odoo', '--if-exists', self.short_name])
             dropdb.wait()
             _logger.info('Remove nginx config file.')
             if os.path.isfile(os.path.join(
@@ -433,8 +430,11 @@ class Build(models.Model):
         Read runbot.json config file
         :return: dict
         """
-        # TODO: handle missing file or possible parsing errors
         self.ensure_one()
-        with open(self.custom_dir+'/runbot.json') as data_file:
-            config = json.load(data_file)
-        return config
+        try:
+            with open(self.custom_dir+'/runbot.json') as data_file:
+                config = json.load(data_file)
+            return config
+        except Exception as e:
+            _logger.info('Unable to parse runbot.json file. Reason: %s', e)
+            return False
