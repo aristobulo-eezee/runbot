@@ -7,6 +7,7 @@
                 <link rel="stylesheet" href="/runbot/static/lib/ionicons/css/ionicons.min.css"/>
                 <link rel="stylesheet" href="/runbot/static/src/css/adminlte.min.css"/>
                 <link rel="stylesheet" href="/runbot/static/src/css/runbot.css"/>
+                <link rel="stylesheet" href="/runbot/static/src/js/runbot.js"/>
             </xpath>
         </template>
 
@@ -42,10 +43,12 @@
                                 <h3 class="box-title">Repositories</h3>
                                 <div class="box-tools">
                                     <div class="input-group input-group-sm" style="width: 150px;">
-                                        <input type="text" name="table_search" class="form-control pull-right" placeholder="Search" />
+                                        <input type="text" name="table_search"
+                                               class="form-control pull-right table-filter"
+                                               placeholder="Search" data-table="table-hover"/>
 
                                         <div class="input-group-btn">
-                                            <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
+                                            <button type="submit" class="btn btn-default disabled"><i class="fa fa-search"></i></button>
                                         </div>
                                     </div>
                                 </div>
@@ -88,10 +91,11 @@
                                 <h3 class="box-title">Branches</h3>
                                 <div class="box-tools">
                                     <div class="input-group input-group-sm" style="width: 150px;">
-                                        <input type="text" name="table_search" class="form-control pull-right" placeholder="Search" />
+                                        <input type="text" name="table_search" class="form-control pull-right table-filter"
+                                               placeholder="Search" data-table="table-hover"/>
 
                                         <div class="input-group-btn">
-                                            <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
+                                            <button type="submit" class="btn btn-default disabled"><i class="fa fa-search"></i></button>
                                         </div>
                                     </div>
                                 </div>
