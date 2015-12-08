@@ -24,6 +24,10 @@
             <field name="key">pg.port</field>
             <field name="value">5432</field>
         </record>
+        <record id="max_running_builds" model="ir.config_parameter">
+            <field name="key">max.running.builds</field>
+            <field name="value">5</field>
+        </record>
         <record id="cron_clean_jobs" model="ir.cron">
             <field name="name">Clean runbot.build jobs</field>
             <field name="priority" eval="int(10)"/>
@@ -33,6 +37,16 @@
             <field name="active" eval="True"/>
             <field name="interval_number">1</field>
             <field name="interval_type">days</field>
+        </record>
+        <record id="cron_kill_ancient_builds" model="ir.cron">
+            <field name="name">Kill ancient builds</field>
+            <field name="priority" eval="int(10)"/>
+            <field name="numbercall" eval="int(-1)"/>
+            <field name="model">runbot.runbot</field>
+            <field name="function">kill_ancient_builds</field>
+            <field name="active" eval="True"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">hours</field>
         </record>
     </data>
 </openerp>

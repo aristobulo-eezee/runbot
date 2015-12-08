@@ -32,3 +32,13 @@ class Runbot(models.TransientModel):
             ('method', '=', 'runbot.build'),
             ('active', '=', False)])
         jobs.unlink()
+
+    @api.model
+    def kill_ancient_builds(self):
+        max_running_builds = self.env.ref('runbot.max_running_builds').value
+        for branch in self.env['runbot.branch'].search([]):
+            running_builds = branch.build_ids.filtered(
+                lambda r: r.state == 'running')
+            for build in running_builds.sorted(
+                    key=lambda r: r.id, reverse=True)[:max_running_builds]:
+                build.kill()
