@@ -43,3 +43,4 @@ class Runbot(models.Model):
             for build in running_builds.sorted(
                     key=lambda r: r.id, reverse=True)[:max_running_builds]:
                 build.kill()
+                build.clean()
