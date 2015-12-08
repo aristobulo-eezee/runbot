@@ -20,7 +20,8 @@
 from openerp import models, api
 
 
-class Runbot(models.AbstractModel):
+class Runbot(models.Model):
+    _auto = False
     _name = 'runbot.runbot'
 
     # Methods
