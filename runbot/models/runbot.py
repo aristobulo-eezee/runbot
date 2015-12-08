@@ -25,18 +25,18 @@ class Runbot(models.Model):
     _name = 'runbot.runbot'
 
     # Methods
-
     @api.model
     def clean_cron_jobs(self):
         jobs = self.env['ir.cron'].search([
             ('model', '=', 'runbot.build'),
-            ('method', '=', 'runbot.build'),
+            ('function', '=', 'run'),
             ('active', '=', False)])
         jobs.unlink()
 
     @api.model
     def kill_ancient_builds(self):
         max_running_builds = self.env.ref('runbot.max_running_builds').value
+        max_running_builds = int(max_running_builds)
         for branch in self.env['runbot.branch'].search([]):
             running_builds = branch.build_ids.filtered(
                 lambda r: r.state == 'running')
