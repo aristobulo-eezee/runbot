@@ -11,7 +11,7 @@ flake8:
     - flake8
   stage: check
   script:
-  - flake8 --config=flake8.cfg .
+  - flake8 --config=.flakerc .
 
 tests:
   tags:
