@@ -257,7 +257,7 @@ class Build(models.Model):
     @api.multi
     def clean(self):
         """
-        Clean filsystem an drop database
+        Clean filesystem an drop database
         :return:
         """
         for build in self:

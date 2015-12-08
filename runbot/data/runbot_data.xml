@@ -24,5 +24,15 @@
             <field name="key">pg.port</field>
             <field name="value">5432</field>
         </record>
+        <record id="cron_clean_jobs" model="ir.cron">
+            <field name="name">Clean runbot.build jobs</field>
+            <field name="priority" eval="int(10)"/>
+            <field name="numbercall" eval="int(-1)"/>
+            <field name="model">runbot.runbot</field>
+            <field name="function">clean_cron_jobs</field>
+            <field name="active" eval="True"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+        </record>
     </data>
 </openerp>
