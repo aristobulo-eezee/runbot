@@ -116,6 +116,15 @@ class Repository(models.Model):
     def gitlab_ci_process_build_hook(self, token, request):
         self.ensure_one()
         _logger.info('Processing Gitlab CI build hook...')
+        if self.env['runbot.build'].search([
+                ('commit', '=', request['sha']),
+                ('branch_id.name', '=', request['ref'])]):
+            # For a reason I haven't discover yet, sometimes same build hook
+            # is received multiple times, so let's check
+            # before if we already have an existing build
+            _logger.info('Skipping commit %s in %s',
+                         (request['sha'][:7], request['ref']))
+            return False
         prj_id = self.gitlab_get_project_id()
         commit = self.gitlab_get_commit(request['sha'])
         status = commit and commit['status']
