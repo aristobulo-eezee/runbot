@@ -167,6 +167,21 @@ class Build(models.Model):
 
         return True
 
+    @api.model
+    def get_log(self, name='server'):
+        self.ensure_one()
+        if not name.endswith('.log'):
+            name += '.log'
+        path = '%s/logs/%s' % (self.env_dir, name)
+        try:
+            with open(path, 'r') as content_file:
+                log = content_file.read()
+        except IOError, e:
+            log = _('IO internal error: %s' % e)
+        except Exception, e:
+            log = _('Unknown internal error %s' % e)
+        return log
+
     @api.multi
     def start_server(self):
         """
@@ -432,6 +447,7 @@ class Build(models.Model):
         """
         self.ensure_one()
         try:
+            # with open('/Users/fho/documents/Eezee-it/RUNBOT/parts/runbot/runbot.json') as data_file:
             with open(self.custom_dir+'/runbot.json') as data_file:
                 config = json.load(data_file)
             return config
