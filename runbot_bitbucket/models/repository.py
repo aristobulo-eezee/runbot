@@ -97,7 +97,7 @@ class Repository(models.Model):
         self.ensure_one()
         bb_repo = self.bitbucket_get_repo()
         commit = self.bitbucket_get_commit(
-            request['push']['changes']['commits'][0]['hash'])
+            request['push']['changes'][0]['commits'][0]['hash'])
         if self and bb_repo == request['repository']['full_name'] and commit:
             branch = self.env['runbot.branch'].sudo().search([
                 ('ref_name', '=', request['ref']),
