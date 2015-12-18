@@ -34,7 +34,7 @@ class Repository(models.Model):
         selection_add=[('bitbucket', 'Bitbucket')], required=True)
 
     @api.model
-    def get_bibucket_token(self):
+    def get_bitbucket_token(self):
         token_param = self.env['ir.config_parameter'].sudo().search([
             ('key', '=', 'bitbucket.password')], limit=1)
         if not token_param:
@@ -42,9 +42,9 @@ class Repository(models.Model):
         return token_param.value
 
     @api.model
-    def get_bibucket_username(self):
+    def get_bitbucket_username(self):
         username_param = self.env['ir.config_parameter'].sudo().search([
-            ('key', '=', 'bitbucket.name')], limit=1)
+            ('key', '=', 'bitbucket.username')], limit=1)
         if not username_param:
             raise Warning(_('Missing "bitbucket.username" system parameter!'))
         return username_param.value
@@ -64,8 +64,8 @@ class Repository(models.Model):
         # Get all repositories to which the use has explicit read access
         r = requests.get('%s%s' % (self.get_bitbucket_url(), endpoint),
                          params={'role': 'member'},
-                         auth=(self.get_bibucket_username(),
-                               self.get_bibucket_token()))
+                         auth=(self.get_bitbucket_username(),
+                               self.get_bitbucket_token()))
         try:
             response = r.json()
             for repo in response['values']:
@@ -83,8 +83,8 @@ class Repository(models.Model):
         if repo:
             endpoint = '/repositories/%s/commits/%s' % (repo, sha)
             r = requests.get('%s%s' % (self.get_bitbucket_url(), endpoint),
-                             auth=(self.get_bibucket_username(),
-                                   self.get_bibucket_token()))
+                             auth=(self.get_bitbucket_username(),
+                                   self.get_bitbucket_token()))
             try:
                 response = r.json()
                 return response
@@ -95,9 +95,9 @@ class Repository(models.Model):
     @api.multi
     def bitbucket_process_push_hook(self, token, request):
         self.ensure_one()
-        gh_repo = self.bitbucket_get_repo()
+        bb_repo = self.bitbucket_get_repo()
         commit = self.bitbucket_get_commit(request['commits'][0]['sha'])
-        if self and gh_repo == request['repository']['full_name'] and commit:
+        if self and bb_repo == request['repository']['full_name'] and commit:
             branch = self.env['runbot.branch'].sudo().search([
                 ('ref_name', '=', request['ref']),
                 ('repo_id', '=', self.id)], limit=1)

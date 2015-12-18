@@ -1,5 +1,5 @@
 variables:
-  PROJECT_MODULES: "runbot"
+  PROJECT_MODULES: "runbot,runbot_gitlab,runbot_github,runbot_bitbucket"
   ODOO_VERSION: "9.0"
 
 stages:
@@ -22,11 +22,11 @@ tests:
   - virtualenv env
   - source env/bin/activate
   - pip install -r requirements.txt
-  - git clone --depth=1 --branch=$ODOO_VERSION https://github.com/eezee-it/odoo.git env/odoo
+  - git clone --quiet --depth=1 --branch=$ODOO_VERSION https://github.com/eezee-it/odoo.git env/odoo
   - rm -rf env/odoo/.git
   - pip install -q -r env/odoo/requirements.txt
   - createdb --encoding=UTF8 --locale=en_US.UTF-8 --template=template0 -D ramdisk $CI_BUILD_REF
   - ./env/odoo/odoo.py -d $CI_BUILD_REF --addons-path=./env/odoo/addons/,./ --log-level=warn --stop-after-init
   - ./env/odoo/odoo.py -d $CI_BUILD_REF --addons-path=./env/odoo/addons/,./ -i $PROJECT_MODULES --without-demo=all --log-level=warn --stop-after-init
-  - ./env/odoo/odoo.py -d $CI_BUILD_REF --addons-path=./env/odoo/addons/,./ -i $PROJECT_MODULES --test-enable --log-level=test --stop-after-init
+  - ./env/odoo/odoo.py -d $CI_BUILD_REF --addons-path=./env/odoo/addons/,./ -i $PROJECT_MODULES --test-enable --log-level=warn --stop-after-init
   - dropdb --if-exists $CI_BUILD_REF
