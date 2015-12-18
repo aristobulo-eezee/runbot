@@ -25,7 +25,7 @@ tests:
   - git clone --depth=1 --branch=$ODOO_VERSION https://github.com/eezee-it/odoo.git env/odoo
   - rm -rf env/odoo/.git
   - pip install -q -r env/odoo/requirements.txt
-  - createdb --encoding=UTF8 --locale=en_US.UTF-8 --template=template0 $CI_BUILD_REF
+  - createdb --encoding=UTF8 --locale=en_US.UTF-8 --template=template0 -D ramdisk $CI_BUILD_REF
   - ./env/odoo/odoo.py -d $CI_BUILD_REF --addons-path=./env/odoo/addons/,./ --log-level=warn --stop-after-init
   - ./env/odoo/odoo.py -d $CI_BUILD_REF --addons-path=./env/odoo/addons/,./ -i $PROJECT_MODULES --without-demo=all --log-level=warn --stop-after-init
   - ./env/odoo/odoo.py -d $CI_BUILD_REF --addons-path=./env/odoo/addons/,./ -i $PROJECT_MODULES --test-enable --log-level=test --stop-after-init
