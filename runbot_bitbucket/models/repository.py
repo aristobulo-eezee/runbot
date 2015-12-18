@@ -58,11 +58,18 @@ class Repository(models.Model):
         return param.value
 
     @api.multi
-    def bitbucket_get_repo(self):
+    def bitbucket_get_repo(self, next=False):
+        """
+        Get all repositories to which the use has explicit read access.
+        Result is a Bitbucket paginated response.
+        :param next: Link to the next page if it exists. The last page of a
+        collection does not have this value. Use this link to navigate the
+        result.
+        :return:
+        """
         self.ensure_one()
         endpoint = '/repositories/'
-        # Get all repositories to which the use has explicit read access
-        r = requests.get('%s%s' % (self.get_bitbucket_url(), endpoint),
+        r = requests.get(next or '%s%s' % (self.get_bitbucket_url(), endpoint),
                          params={'role': 'member'},
                          auth=(self.get_bitbucket_username(),
                                self.get_bitbucket_token()))
@@ -72,6 +79,8 @@ class Repository(models.Model):
                 for link in repo['links']['clone']:
                     if self.name in link['href']:
                         return repo['full_name']
+            if response.get('next', False):
+                self.bitbucket_get_repo(next=response['next'])
         except ValueError:
             raise Warning(_('Couldn\'t get repo from Bitbucket Server'))
         return False
