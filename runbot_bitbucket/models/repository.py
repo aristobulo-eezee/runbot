@@ -81,7 +81,7 @@ class Repository(models.Model):
         self.ensure_one()
         repo = self.bitbucket_get_repo()
         if repo:
-            endpoint = '/repositories/%s/commits/%s' % (repo, sha)
+            endpoint = '/repositories/%s/commit/%s' % (repo, sha)
             r = requests.get('%s%s' % (self.get_bitbucket_url(), endpoint),
                              auth=(self.get_bitbucket_username(),
                                    self.get_bitbucket_token()))
@@ -96,7 +96,8 @@ class Repository(models.Model):
     def bitbucket_process_push_hook(self, token, request):
         self.ensure_one()
         bb_repo = self.bitbucket_get_repo()
-        commit = self.bitbucket_get_commit(request['commits'][0]['sha'])
+        commit = self.bitbucket_get_commit(
+            request['push']['changes']['commits'][0]['hash'])
         if self and bb_repo == request['repository']['full_name'] and commit:
             branch = self.env['runbot.branch'].sudo().search([
                 ('ref_name', '=', request['ref']),
