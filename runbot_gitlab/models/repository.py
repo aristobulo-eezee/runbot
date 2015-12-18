@@ -92,7 +92,10 @@ class Repository(models.Model):
         _logger.info('Processing Gitlab push hook...')
         prj_id = self.gitlab_get_project_id()
         commit = self.gitlab_get_commit(request['commits'][0]['id'])
-        if self and prj_id == request.get('project_id', None) and commit:
+        status = commit and commit.get('status', 'success')
+        _logger.info('Gitlab CI build status: %s', status)
+        if self and prj_id == request.get('project_id', None) and commit\
+                and status == 'success':
             _logger.info('Token accepted, preparing build.')
             # TODO: This way to update repo has to be improved
             self.clone(branch=request['ref'][len('refs/heads/'):])
@@ -109,7 +112,7 @@ class Repository(models.Model):
                     'branch_id': branch.id,
                 })
             return build
-        _logger.info('Couldn\'t process webhook from Gitlab server!')
+        _logger.info('Skipping build...')
         return False
 
     @api.multi
