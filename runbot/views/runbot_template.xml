@@ -110,7 +110,7 @@
                                             <th>Builds</th>
                                         </tr>
                                         <t t-foreach="branches" t-as="branch">
-                                            <tr>
+                                            <tr t-if="branch.is_sticky or branch.build_ids">
                                                 <td>
                                                    <h4>
                                                        <i class="text-center fa fa-star text-yellow" t-if="branch.is_sticky"></i>
