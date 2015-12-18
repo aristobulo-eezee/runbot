@@ -129,9 +129,7 @@ class Repository(models.Model):
         commit = self.gitlab_get_commit(request['sha'])
         status = commit and commit['status']
         _logger.info('Gitlab CI build status: %s', status)
-        if prj_id == self.gitlab_ci_get_gitlab_project_id(
-                request.get('project_id', None)) and \
-                status == 'success':
+        if prj_id == request.get('project_id', None) and status == 'success':
             _logger.info('Token accepted, preparing build.')
             # TODO: This way to update repo has to be improved
             self.clone(branch=request['ref'])
