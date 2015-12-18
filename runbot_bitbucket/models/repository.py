@@ -38,7 +38,7 @@ class Repository(models.Model):
         token_param = self.env['ir.config_parameter'].sudo().search([
             ('key', '=', 'bitbucket.password')], limit=1)
         if not token_param:
-            raise Warning(_('Missing "bitbucket.pasword" system parameter!'))
+            raise Warning(_('Missing "bitbucket.password" system parameter!'))
         return token_param.value
 
     @api.model
@@ -70,7 +70,7 @@ class Repository(models.Model):
             response = r.json()
             for repo in response['values']:
                 for link in repo['links']['clone']:
-                    if self.name == link['href']:
+                    if self.name in link['href']:
                         return repo['full_name']
         except ValueError:
             raise Warning(_('Couldn\'t get repo from Bitbucket Server'))
