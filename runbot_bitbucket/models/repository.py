@@ -77,7 +77,9 @@ class Repository(models.Model):
             response = r.json()
             for repo in response['values']:
                 for link in repo['links']['clone']:
-                    if self.name in link['href']:
+                    if self.name.replace(
+                            '@bitbucket.org:',
+                            '@bitbucket.org/') in link['href']:
                         return repo['full_name']
             if response.get('next', False):
                 self.bitbucket_get_repo(next=response['next'])
