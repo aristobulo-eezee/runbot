@@ -80,7 +80,7 @@ class Repository(models.Model):
                     # Format repo.name and remote trailing '.git'
                     repo_str = self.name.replace(
                             '@bitbucket.org:',
-                            '@bitbucket.org/')[:len(self.name-4)]
+                            '@bitbucket.org/')[:len(self.name)-4]
                     if repo_str in link['href']:
                         return repo['full_name']
             if response.get('next', False):
