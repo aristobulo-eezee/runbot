@@ -70,21 +70,19 @@ class Repository(models.Model):
         self.ensure_one()
         endpoint = '/repositories/'
         r = requests.get(next or '%s%s' % (self.get_bitbucket_url(), endpoint),
-                         params={'role': 'member'},
+                         params=not next and {'role': 'member'} or {},
                          auth=(self.get_bitbucket_username(),
                                self.get_bitbucket_token()))
         try:
             response = r.json()
             for repo in response['values']:
                 for link in repo['links']['clone']:
-                    # Format repo.name and remote trailing '.git'
-                    repo_str = self.name.replace(
+                    if self.name.replace(
                             '@bitbucket.org:',
-                            '@bitbucket.org/')[:len(self.name)-4]
-                    if repo_str in link['href']:
+                            '@bitbucket.org/') in link['href']:
                         return repo['full_name']
             if response.get('next', False):
-                self.bitbucket_get_repo(next=response['next'])
+                return self.bitbucket_get_repo(next=response['next'])
         except ValueError:
             raise Warning(_('Couldn\'t get repo from Bitbucket Server'))
         return False
