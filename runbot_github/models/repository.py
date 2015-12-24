@@ -44,7 +44,7 @@ class Repository(models.Model):
     @api.model
     def get_github_username(self):
         username_param = self.env['ir.config_parameter'].sudo().search([
-            ('key', '=', 'github.name')], limit=1)
+            ('key', '=', 'github.username')], limit=1)
         if not username_param:
             raise Warning(_('Missing "github.username" system parameter!'))
         return username_param.value
@@ -60,7 +60,7 @@ class Repository(models.Model):
     @api.multi
     def github_get_repo(self):
         self.ensure_one()
-        endpoint = '/user/repos/'
+        endpoint = '/user/repos'
         r = requests.get('%s%s' % (self.get_github_url(), endpoint),
                          auth=(self.get_github_username(),
                                self.get_github_token()))
