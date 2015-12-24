@@ -148,7 +148,11 @@ class Repository(models.Model):
             self.update_branches(heads=heads)
             self.update_tags(tags=tags)
         except Exception as e:
-            raise Warning(e)
+            _logger.error(e)
+            raise Warning(_('An error happened while executing \'git clone\' on'
+                          'this repository. Please check that you have the '
+                          'rights to access it and that it does not already'
+                          'exist in static/repo/ directory.'))
 
     @api.multi
     def update_branches(self, heads=[]):
