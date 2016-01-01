@@ -63,7 +63,7 @@ class Repository(models.Model):
     @api.constrains('odoo_repo')
     def _check_description(self):
         self.ensure_one()
-        count = self.env['runbot.repo'].search_count([
+        count = self.search_count([
             ('odoo_repo', '=', True)])
         if count > 1:
             raise ValidationError("Can\'t have more than one default odoo "
