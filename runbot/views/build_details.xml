@@ -27,7 +27,7 @@
                                     <tr>
                                         <td>Status</td>
                                         <td>
-                                            <span t-if="state in ['scheduled', 'creation', 'installing', 'running']" class="fa fa-ok"/>
+                                            <span t-if="state in ['scheduled', 'creation', 'installing', 'running']" class="fa fa-check"/>
                                             <span t-if="state in ['failed', 'killed']" class="fa fa-remove"/>
                                             <span t-if="state in ['stopped']" class="fa fa-off"/>
                                              <span t-esc="state"/>
@@ -50,7 +50,6 @@
                         <li role="presentation">
                             <a href="#install" data-toggle="tab"><span class="fa fa-file-text-o"/> Install</a>
                         </li>
-                        <li role="presentation"><a href="#test" data-toggle="tab">Test</a></li>
                     </ul>
                     <div class="tab-content" id="tabs">
                         <div class="tab-pane active" id="server">
@@ -63,7 +62,6 @@
                         </div>
                         <div class="tab-pane" id="install">
                             <div class="log-container">
-                                <p>Install</p>
                                 <p t-esc="build.get_log('install')"/>
                             </div>
                         </div>

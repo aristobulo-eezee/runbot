@@ -1,3 +1,4 @@
 *.pyc
 */static/repo
 */static/build
+*/static/nginx
