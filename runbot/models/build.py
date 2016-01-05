@@ -447,7 +447,6 @@ class Build(models.Model):
         """
         self.ensure_one()
         try:
-            # with open('/Users/fho/documents/Eezee-it/RUNBOT/parts/runbot/runbot.json') as data_file:
             with open(self.custom_dir+'/runbot.json') as data_file:
                 config = json.load(data_file)
             return config
