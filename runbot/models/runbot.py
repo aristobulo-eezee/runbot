@@ -41,6 +41,6 @@ class Runbot(models.Model):
             running_builds = branch.build_ids.filtered(
                 lambda r: r.state == 'running')
             for build in running_builds.sorted(
-                    key=lambda r: r.id, reverse=True)[:max_running_builds]:
+                    key=lambda r: r.id, reverse=True)[max_running_builds:]:
                 build.kill()
                 build.clean()

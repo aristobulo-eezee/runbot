@@ -60,6 +60,8 @@ class Build(models.Model):
     lp_port = fields.Integer(string='Longpolling Port')
     env_dir = fields.Char(string='Virtualenv', compute='_compute_dirs')
     parts_dir = fields.Char(string='Parts', compute='_compute_dirs')
+    data_dir = fields.Char(string='Data', compute='_compute_dirs',
+                           help='Filestore location')
     custom_dir = fields.Char(string='Custom modules', compute='_compute_dirs')
     odoo_dir = fields.Char(string='Odoo', compute='_compute_dirs')
     short_name = fields.Char(string='Short name', compute='_compute_dirs')
@@ -73,6 +75,7 @@ class Build(models.Model):
             build.parts_dir = '%s/parts' % build.env_dir
             build.custom_dir = '%s/custom' % build.parts_dir
             build.odoo_dir = '%s/odoo' % build.parts_dir
+            build.data_dir = '%s/data' % build.parts_dir
 
     @api.multi
     def kill(self):
@@ -133,25 +136,38 @@ class Build(models.Model):
         pg_host = self.env.ref('runbot.pg_host').value
         pg_port = self.env.ref('runbot.pg_port').value
 
-        addons_path = '--addons-path='
+        addons_path = ''
         if runbot_cfg.get('enterprise', False):
             addons_path = '%s%s/enterprise,' % (addons_path, self.parts_dir)
+
+        addons_path = '%s%s/addons,%s' % (
+            addons_path,
+            self.odoo_dir,
+            ','.join(['%s/%s' % (self.custom_dir, p)
+                      for p in runbot_cfg['addons']['path']]))
+
+        conf_values = {
+            'addons_path': addons_path,
+            'db_user': pg_username,
+            'db_password': pg_password,
+            'db_host': pg_host,
+            'db_port': pg_port,
+            'db_name': self.short_name,
+            'db_filter': self.short_name,
+            'data_dir': self.data_dir,
+        }
+
+        odoo_config = self.pool['ir.ui.view'].render(
+            self.env.cr, self.env.user.id,
+            'runbot.odoo_conf_template', values=conf_values)
+        open(self.env_dir+'/odoo.conf', 'w+').write(odoo_config)
+
         cmd = [
             '%s/bin/python' % self.env_dir,
             '%s/openerp-server' % self.odoo_dir,
-            '--db-filter', '%s.*$' % self.short_name,
-            '-r', pg_username,
-            '-w', pg_password,
-            '--db_host', pg_host,
-            '--db_port', pg_port,
-            '%s%s/addons,%s' % (
-                addons_path,
-                self.odoo_dir,
-                ','.join(['%s/%s' % (self.custom_dir, p)
-                          for p in runbot_cfg['addons']['path']])),
+            '-c', '%s/odoo.conf' % self.env_dir,
             '--xmlrpc-port=%s' % odoo_port, '--longpolling-port=%s' % lp_port,
             '--logfile', '%s/logs/install.log' % self.env_dir,
-            '-d', self.short_name,
             '-i', '%s' % ','.join(runbot_cfg['addons']['install']),
             '--stop-after-init']
 
@@ -193,31 +209,12 @@ class Build(models.Model):
         _logger.info('Found %s and %s.' % (odoo_port, lp_port))
         _logger.info('Starting odoo server.')
 
-        # Prepare command
-        pg_username = self.env.ref('runbot.pg_username').value
-        pg_password = self.env.ref('runbot.pg_password').value
-        pg_host = self.env.ref('runbot.pg_host').value
-        pg_port = self.env.ref('runbot.pg_port').value
-
-        addons_path = '--addons-path='
-        if runbot_cfg.get('enterprise', False):
-            addons_path = '%s%s/enterprise,' % (addons_path, self.parts_dir)
         cmd = [
             '%s/bin/python' % self.env_dir,
             '%s/openerp-server' % self.odoo_dir,
-            '--db-filter', '%s.*$' % self.short_name,
-            '-r', pg_username,
-            '-w', pg_password,
-            '--db_host', pg_host,
-            '--db_port', pg_port,
-            '%s%s/addons,%s' % (
-                addons_path,
-                self.odoo_dir,
-                ','.join(['%s/%s' % (self.custom_dir, p)
-                          for p in runbot_cfg['addons']['path']])),
+            '-c', '%s/odoo.conf' % self.env_dir,
             '--xmlrpc-port=%s' % odoo_port, '--longpolling-port=%s' % lp_port,
-            '--logfile', '%s/logs/server.log' % self.env_dir,
-            '-d', self.short_name, ]
+            '--logfile', '%s/logs/server.log' % self.env_dir, ]
 
         if runbot_cfg.get('tests', False):
             cmd.append('--test-enabled')
@@ -250,7 +247,7 @@ class Build(models.Model):
              'w+').write(nginx_config)
         # Odoo user must be part of sudoers and able to execute nginx reload
         # with sudo without being prompted for password
-        nginx = subprocess.Popen(['sudo', '/etc/init.d/nginx', 'reload'])
+        nginx = subprocess.Popen(['sudo', 'nginx', '-s', 'reload'])
         nginx.wait()
         return True
 
@@ -277,7 +274,7 @@ class Build(models.Model):
                                  'nginx/%s.conf' % self.short_name))
             # Odoo user must be part of sudoers and able to execute nginx
             # reload with sudo without being prompted for password
-            nginx = subprocess.Popen(['sudo', '/etc/init.d/nginx', 'reload'])
+            nginx = subprocess.Popen(['sudo', 'nginx', '-s', 'reload'])
             nginx.wait()
 
     @api.multi
