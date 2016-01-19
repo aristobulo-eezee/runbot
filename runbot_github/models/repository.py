@@ -44,7 +44,7 @@ class Repository(models.Model):
     @api.model
     def get_github_username(self):
         username_param = self.env['ir.config_parameter'].sudo().search([
-            ('key', '=', 'github.name')], limit=1)
+            ('key', '=', 'github.username')], limit=1)
         if not username_param:
             raise Warning(_('Missing "github.username" system parameter!'))
         return username_param.value
@@ -60,7 +60,7 @@ class Repository(models.Model):
     @api.multi
     def github_get_repo(self):
         self.ensure_one()
-        endpoint = '/user/repos/'
+        endpoint = '/user/repos'
         r = requests.get('%s%s' % (self.get_github_url(), endpoint),
                          auth=(self.get_github_username(),
                                self.get_github_token()))
@@ -93,7 +93,7 @@ class Repository(models.Model):
     def github_process_push_hook(self, token, request):
         self.ensure_one()
         gh_repo = self.github_get_repo()
-        commit = self.github_get_commit(request['commits'][0]['sha'])
+        commit = self.github_get_commit(request['commits'][0]['id'])
         if self and gh_repo == request['repository']['full_name'] and commit:
             branch = self.env['runbot.branch'].sudo().search([
                 ('ref_name', '=', request['ref']),
@@ -101,10 +101,10 @@ class Repository(models.Model):
             build = self.env['runbot.build'].sudo().search([
                 ('repo_id.id', '=', self.id),
                 ('branch_id.ref_name', '=', request['ref']),
-                ('commit', '=', commit['id'])], limit=1)
+                ('commit', '=', commit['sha'])], limit=1)
             if not build:
                 build = self.env['runbot.build'].sudo().create({
-                    'commit': commit['id'],
+                    'commit': commit['sha'],
                     'branch_id': branch.id,
                 })
             return build
