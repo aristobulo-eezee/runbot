@@ -34,7 +34,7 @@ class Repository(models.Model):
         selection_add=[('github', 'Github')], required=True)
 
     @api.model
-    def get_gitlab_token(self):
+    def get_github_token(self):
         token_param = self.env['ir.config_parameter'].sudo().search([
             ('key', '=', 'github.token')], limit=1)
         if not token_param:
@@ -42,7 +42,7 @@ class Repository(models.Model):
         return token_param.value
 
     @api.model
-    def get_gitlab_username(self):
+    def get_github_username(self):
         username_param = self.env['ir.config_parameter'].sudo().search([
             ('key', '=', 'github.name')], limit=1)
         if not username_param:
@@ -62,8 +62,8 @@ class Repository(models.Model):
         self.ensure_one()
         endpoint = '/user/repos/'
         r = requests.get('%s%s' % (self.get_github_url(), endpoint),
-                         auth=(self.get_gitlab_username(),
-                               self.get_gitlab_token()))
+                         auth=(self.get_github_username(),
+                               self.get_github_token()))
         try:
             response = r.json()
             for repo in response:
@@ -80,8 +80,8 @@ class Repository(models.Model):
         if repo:
             endpoint = '/repos/%s/commits/%s' % (repo, sha)
             r = requests.get('%s%s' % (self.get_github_url(), endpoint),
-                             auth=(self.get_gitlab_username(),
-                                   self.get_gitlab_token()))
+                             auth=(self.get_github_username(),
+                                   self.get_github_token()))
             try:
                 response = r.json()
                 return response
@@ -108,5 +108,5 @@ class Repository(models.Model):
                     'branch_id': branch.id,
                 })
             return build
-        _logger.info('Couldn\'t process webhook from Gitlab server!')
+        _logger.info('Couldn\'t process webhook from Github server!')
         return False

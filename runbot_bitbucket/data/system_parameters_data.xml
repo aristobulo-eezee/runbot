@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="1">
+        <record id="bitbucket_username" model="ir.config_parameter">
+            <field name="key">bitbucket.username</field>
+            <field name="value">put_your_username_here!</field>
+        </record>
+
+        <record id="bitbucket_personal_token" model="ir.config_parameter">
+            <field name="key">bitbucket.password</field>
+            <field name="value">put_your_token_here!</field>
+        </record>
+
+        <record id="bitbucket_url" model="ir.config_parameter">
+            <field name="key">bitbucket.url</field>
+            <field name="value">https://api.bitbucket.org/2.0</field>
+        </record>
+    </data>
+</openerp>
