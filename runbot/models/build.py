@@ -183,7 +183,7 @@ class Build(models.Model):
 
         return True
 
-    @api.model
+    @api.multi
     def get_log(self, name='server'):
         self.ensure_one()
         if not name.endswith('.log'):
