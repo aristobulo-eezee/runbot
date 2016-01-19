@@ -247,6 +247,7 @@ class Build(models.Model):
              'w+').write(nginx_config)
         # Odoo user must be part of sudoers and able to execute nginx reload
         # with sudo without being prompted for password
+        _logger.info('Reloading nginx...')
         nginx = subprocess.Popen(['sudo', 'nginx', '-s', 'reload'])
         nginx.wait()
         return True
@@ -274,6 +275,7 @@ class Build(models.Model):
                                  'nginx/%s.conf' % self.short_name))
             # Odoo user must be part of sudoers and able to execute nginx
             # reload with sudo without being prompted for password
+            _logger.info('Reloading nginx...')
             nginx = subprocess.Popen(['sudo', 'nginx', '-s', 'reload'])
             nginx.wait()
 
