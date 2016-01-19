@@ -136,7 +136,7 @@ class Build(models.Model):
         pg_host = self.env.ref('runbot.pg_host').value
         pg_port = self.env.ref('runbot.pg_port').value
 
-        addons_path = '--addons-path='
+        addons_path = ''
         if runbot_cfg.get('enterprise', False):
             addons_path = '%s%s/enterprise,' % (addons_path, self.parts_dir)
 
@@ -160,7 +160,7 @@ class Build(models.Model):
         odoo_config = self.pool['ir.ui.view'].render(
             self.env.cr, self.env.user.id,
             'runbot.odoo_conf_template', values=conf_values)
-        open(build.env_dir+'/odoo.conf', 'w+').write(odoo_config)
+        open(self.env_dir+'/odoo.conf', 'w+').write(odoo_config)
 
         cmd = [
             '%s/bin/python' % self.env_dir,
@@ -247,7 +247,7 @@ class Build(models.Model):
              'w+').write(nginx_config)
         # Odoo user must be part of sudoers and able to execute nginx reload
         # with sudo without being prompted for password
-        nginx = subprocess.Popen(['sudo', '/etc/init.d/nginx', 'reload'])
+        nginx = subprocess.Popen(['sudo', 'nginx', '-s', 'reload'])
         nginx.wait()
         return True
 
@@ -274,8 +274,7 @@ class Build(models.Model):
                                  'nginx/%s.conf' % self.short_name))
             # Odoo user must be part of sudoers and able to execute nginx
             # reload with sudo without being prompted for password
-            # TODO; support multiple platforms
-            nginx = subprocess.Popen(['sudo', '/etc/init.d/nginx', 'reload'])
+            nginx = subprocess.Popen(['sudo', 'nginx', '-s', 'reload'])
             nginx.wait()
 
     @api.multi

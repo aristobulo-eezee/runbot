@@ -93,7 +93,7 @@ class Repository(models.Model):
     def github_process_push_hook(self, token, request):
         self.ensure_one()
         gh_repo = self.github_get_repo()
-        commit = self.github_get_commit(request['commits'][0]['sha'])
+        commit = self.github_get_commit(request['commits'][0]['id'])
         if self and gh_repo == request['repository']['full_name'] and commit:
             branch = self.env['runbot.branch'].sudo().search([
                 ('ref_name', '=', request['ref']),
@@ -101,10 +101,10 @@ class Repository(models.Model):
             build = self.env['runbot.build'].sudo().search([
                 ('repo_id.id', '=', self.id),
                 ('branch_id.ref_name', '=', request['ref']),
-                ('commit', '=', commit['id'])], limit=1)
+                ('commit', '=', commit['sha'])], limit=1)
             if not build:
                 build = self.env['runbot.build'].sudo().create({
-                    'commit': commit['id'],
+                    'commit': commit['sha'],
                     'branch_id': branch.id,
                 })
             return build
