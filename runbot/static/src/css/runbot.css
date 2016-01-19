@@ -31,3 +31,9 @@
     font-size: 14px !important;
 
 }
+
+.log-container {
+    background-color: black;
+    color: #E0E0E0;
+    padding: 7px;
+}

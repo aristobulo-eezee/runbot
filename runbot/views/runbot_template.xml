@@ -140,7 +140,7 @@
                                                                             <i class="ion-ios-close-outline"></i>
                                                                         </span>
                                                                         <div class="info-box-content">
-                                                                            <a t-attf-href="/runbot/#{'build/%s' % slug(build)}"><span class="info-box-text">#<t t-esc="build.id"/></span></a>
+                                                                            <a t-attf-href="/runbot/#{'build/%s' % slug(build)}"><span class="info-box-text">#<t t-attf-href="#{'/runbot/build/%s' % slug(build)}" t-esc="build.id"/></span></a>
                                                                             <span class="info-box-number" t-field="build.short_name"/>
                                                                             <span class="text-muted" t-field="build.state"/><br />
                                                                             <small class="text-muted"><i class="ion-ios-timer-outline"></i> <span t-esc="time_ago(build.last_state_since)"/></small>

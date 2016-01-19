@@ -116,3 +116,61 @@ class RunbotController(http.Controller):
             build.sudo().run()
 
         return request.redirect('/runbot/repo/%s' % slug(build.repo_id))
+
+    @http.route('/runbot/build/<model("runbot.build"):build>',
+                type='http', auth="public", website=True)
+    def build_details(self, build):
+        tec_info = self.get_technical_information(build)
+        state = build.state
+        context = {
+            'time_ago': self.time_ago,
+            'build': build,
+            'fqdn': socket.getfqdn(),
+            'slug': slug,
+            'tec_info': tec_info,
+            'state': state,
+            'breadcrumbs': [
+                {
+                    'string': 'Repositories',
+                    'url': '/runbot',
+                    'active': False,
+                },
+                {
+                    'string': build.repo_id.name,
+                    'url': '/runbot/repo/%s' % slug(build.repo_id),
+                    'active': True,
+                },
+            ],
+        }
+        return request.website.render('runbot.build_details', context)
+
+    def get_technical_information(self, build):
+        """
+        Get technicals information about the Build.
+        Define field to display into a list and search his label.
+        Then, get the value of each field.
+        If a field is a M2O, take the 'display_name' field to display it
+        Args:
+            build: runbot.build recordset
+
+        Returns: dict
+
+        """
+        field_obj = request.env['ir.model.fields']
+        model_obj = request.env['ir.model']
+        model = model_obj.search([('model', '=', 'runbot.build')], limit=1)
+        # Fields to display
+        field_names = ['branch_id', 'repo_id', 'lp_port', 'pid', 'port',
+                       'commit']
+        information = {}
+        criterion = [('name', 'in', field_names), ('model_id', '=', model.id)]
+        fields_found = field_obj.search(criterion, limit=len(field_names))
+        for field in fields_found:
+            # Be careful, the label of the field is the key of the dict!
+            field_value = getattr(build, field.name, '')
+            if field.ttype == 'many2one':
+                field_value = field_value.display_name
+            information.update({
+                field.field_description: field_value,
+            })
+        return information

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <!--Build details-->
+        <template id="runbot.build_details" name="Build details">
+            <t t-call='runbot.layout'>
+                <div class="container">
+                    <blockquote>
+                        <div class="row">
+                            <div class="col-xs-4">
+                                <h1>Build <span t-esc="build.short_name"/></h1>
+                            </div>
+                            <div class="col-xs-8 text-right">
+                                <div class="btn-group" role="group" aria-label="...">
+                                    <a t-attf-href="/runbot/#{'build/%s' % slug(build)}"><button type="button" class="btn btn-info"><span class="fa fa-refresh"/>Refresh page</button></a>
+                                    <a t-if="build.state not in ['scheduled']" t-attf-href="/runbot/#{'build/%s' % slug(build)}"><button type="button" class="btn btn-primary"><span class="fa fa-tint"/> Clean</button></a>
+                                    <a t-if="build.state not in ['scheduled', 'running']" t-attf-href="#{'/runbot/build/%s/start' % slug(build)}"><button type="button" class="btn btn-success"><span class="fa fa-play"/> Build</button></a>
+                                    <a t-if="build.state not in ['scheduled']" t-attf-href="/runbot/#{'build/%s' % slug(build)}"><button type="button" class="btn btn-warning"><span class="fa fa-repeat"/> Rebuild</button></a>
+                                    <a t-if="build.state not in ['failed']" t-attf-href="/runbot/#{'build/%s' % slug(build)}"><button type="button" class="btn btn-danger"><span class="fa fa-remove"/> Kill</button></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">Technical information</div>
+                            <table class="table table-striped table-condensed">
+                                <tbody>
+                                    <tr>
+                                        <td>Status</td>
+                                        <td>
+                                            <span t-if="state in ['scheduled', 'creation', 'installing', 'running']" class="fa fa-check"/>
+                                            <span t-if="state in ['failed', 'killed']" class="fa fa-remove"/>
+                                            <span t-if="state in ['stopped']" class="fa fa-off"/>
+                                             <span t-esc="state"/>
+                                        </td>
+                                    </tr>
+                                    <tr t-foreach="tec_info" t-as="info">
+                                        <td><span t-esc="info"/></td>
+                                        <td><span t-esc="info_value"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </blockquote>
+
+                    <ul class="nav nav-tabs">
+                        <li role="presentation">
+                            <a href="#server" data-toggle="tab"><span class="fa fa-files-o"/> Server</a>
+                        </li>
+                        <li role="presentation">
+                            <a href="#install" data-toggle="tab"><span class="fa fa-file-text-o"/> Install</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="tabs">
+                        <div class="tab-pane active" id="server">
+                            <div class="panel panel-default">
+                                <!--<div class="panel-heading">Panel heading without title</div>-->
+                                <div class="panel-body log-container">
+                                    <p t-esc="build.get_log('server')"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="install">
+                            <div class="log-container">
+                                <p t-esc="build.get_log('install')"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <script type="text/javascript">
+                    jQuery(document).ready(function ($) {
+                        $('#tabs').tab();
+                    });
+                </script>
+            </t>
+        </template>
+    </data>
+</openerp>

@@ -184,6 +184,21 @@ class Build(models.Model):
         return True
 
     @api.multi
+    def get_log(self, name='server'):
+        self.ensure_one()
+        if not name.endswith('.log'):
+            name += '.log'
+        path = '%s/logs/%s' % (self.env_dir, name)
+        try:
+            with open(path, 'r') as content_file:
+                log = content_file.read()
+        except IOError, e:
+            log = _('IO internal error: %s' % e)
+        except Exception, e:
+            log = _('Unknown internal error %s' % e)
+        return log
+
+    @api.multi
     def start_server(self):
         """
         Run odoo build
