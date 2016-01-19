@@ -141,10 +141,10 @@ class Build(models.Model):
             addons_path = '%s%s/enterprise,' % (addons_path, self.parts_dir)
 
         addons_path = '%s%s/addons,%s' % (
-                addons_path,
-                self.odoo_dir,
-                ','.join(['%s/%s' % (self.custom_dir, p)
-                          for p in runbot_cfg['addons']['path']]))
+            addons_path,
+            self.odoo_dir,
+            ','.join(['%s/%s' % (self.custom_dir, p)
+                      for p in runbot_cfg['addons']['path']]))
 
         conf_values = {
             'addons_path': addons_path,
