@@ -117,6 +117,17 @@ class RunbotController(http.Controller):
 
         return request.redirect('/runbot/repo/%s' % slug(build.repo_id))
 
+    @http.route('/runbot/build/<model("runbot.build"):build>/rebuild',
+                type='http', auth="public", website=True)
+    def rebuild_build(self, build):
+        env = request.env
+        try:
+            env['runbot.build'].run(build.id)
+        except Exception as e:
+            _logger.error(e)
+
+        return request.redirect('/runbot/repo/%s' % slug(build.repo_id))
+
     @http.route('/runbot/build/<model("runbot.build"):build>',
                 type='http', auth="public", website=True)
     def build_details(self, build):

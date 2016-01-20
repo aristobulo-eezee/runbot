@@ -4,10 +4,11 @@
         <!--Assets-->
         <template id="runbot.assets" inherit_id="website.assets_frontend">
             <xpath expr="." position="inside">
+                <script type="text/javascript" src="/runbot/static/src/js/runbot.js"></script>
+                <script type="text/javascript" src="/runbot/static/lib/holderjs/holder.min.js"></script>
                 <link rel="stylesheet" href="/runbot/static/lib/ionicons/css/ionicons.min.css"/>
                 <link rel="stylesheet" href="/runbot/static/src/css/adminlte.min.css"/>
                 <link rel="stylesheet" href="/runbot/static/src/css/runbot.css"/>
-                <link rel="stylesheet" href="/runbot/static/src/js/runbot.js"/>
             </xpath>
         </template>
 
@@ -160,6 +161,81 @@
                             <!-- /.box-body -->
                         </div>
                         <!-- /.box -->
+                    </div>
+                </div>
+            </t>
+        </template>
+
+        <!--Build details-->
+        <template id="runbot.build_details" name="Build details">
+            <t t-call='runbot.layout'>
+                <div class="row">
+                    <div class="col-xs-3">
+                        <!--Build info-->
+                        <div t-attf-class="box box-#{build.state == 'running' and 'primary' or build.state in ['scheduled', 'installing'] and 'warning' or 'default'}">
+                            <div class="box-body box-profile">
+                                <img class="profile-user-img img-responsive img-circle" t-attf-data-src="holder.js/96x96?text=#{build.branch_id.repo_id.alias[0] or ''}&amp;size=48&amp;bg=ffffff&amp;" />
+                                <h3 class="profile-username text-center" t-field="build.branch_id.ref_name"/>
+                                <p class="text-muted text-center" ><i class="fa fa-code-fork"/> <t t-esc="build.commit[:8]"/></p>
+                                <ul class="list-group list-group-unbordered">
+                                    <li class="list-group-item">
+                                        <b t-field="build.state"/> <span class="pull-right">since <span t-esc="time_ago(build.last_state_since)"/></span>
+                                    </li>
+                                </ul>
+                                <div class="btn-group pull-right" role="group" aria-label="...">
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-default btn-flat dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                          <i class="fa fa-ellipsis-h"></i>
+                                        </button>
+                                        <t t-if="build.state == 'running'">
+                                            <a class="btn btn-default btn-flat" t-attf-href="#{'http://%s.%s' % (build.short_name, fqdn)}" target="_blank" role="button">OPEN</a>
+                                            <ul class="dropdown-menu">
+                                                <li><a t-attf-href="#{'/runbot/build/%s/kill' % slug(build)}" target="_self"><i class="fa fa-times"/> KILL</a></li>
+                                                <li><a t-attf-href="#{'/runbot/build/%s/rebuild' % slug(build)}" target="_self"><i class="fa fa-refresh"></i> REBUILD</a></li>
+                                            </ul>
+                                        </t>
+                                        <t t-if="build.state == 'killed'">
+                                            <a class="btn btn-default btn-flat" t-attf-href="#{'/runbot/build/%s/start' % slug(build)}" target="_self" role="button">OPEN</a>
+                                            <ul class="dropdown-menu">
+                                                <li><a t-attf-href="#{'/runbot/build/%s/rebuild' % slug(build)}" target="_self"><i class="fa fa-refresh"></i> REBUILD</a></li>
+                                            </ul>
+                                        </t>
+                                        <t t-if="build.state in ['scheduled', 'installing']">
+                                            <ul class="dropdown-menu">
+                                                <li><a href="#"><i class="fa fa-hourglass-start"></i> Waiting...</a></li>
+                                            </ul>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--Commit info-->
+                        <div class="box box-default">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">Commit information</h3>
+                            </div>
+                            <div class="box-body"></div>
+                        </div>
+                    </div>
+                    <div class="col-xs-9">
+                        <div class="nav-tabs-custom">
+                            <ul class="nav nav-tabs">
+                                <li class="active">
+                                    <a href="#server" data-toggle="tab" aria-expanded="true">server.log</a>
+                                </li>
+                                <li class="">
+                                    <a href="#install" data-toggle="tab" aria-expanded="true">install.log</a>
+                                </li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="active tab-pane" id="server">
+                                    <textarea class="form-control" rows="20" disabled="true"><t t-esc="build.get_log('server')"/></textarea>
+                                </div>
+                                <div class="tab-pane" id="install">
+                                    <textarea class="form-control" rows="20" readonly="true"><t t-esc="build.get_log('install').strip()"/></textarea>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </t>

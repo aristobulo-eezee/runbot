@@ -377,16 +377,6 @@ class Build(models.Model):
         s.close()
         return port
 
-    @api.multi
-    def log(self, n=50):
-        """
-        Get build logfile
-        :param n: number of lines
-        :return: last n lines of logfile
-        """
-        self.ensure_one()
-        return
-
     @api.model
     def run(self, build_id):
         build = self.browse(build_id)
