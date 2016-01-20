@@ -113,7 +113,6 @@ class RunbotController(http.Controller):
             build.sudo().start_server()
         except Exception as e:
             _logger.error(e)
-            build.sudo().run()
 
         return request.redirect('/runbot/build/%s' % slug(build.repo_id))
 
