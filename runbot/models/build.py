@@ -160,7 +160,8 @@ class Build(models.Model):
 
         odoo_config = self.pool['ir.ui.view'].render(
             self.env.cr, self.env.user.id,
-            'runbot.odoo_conf_template', values=conf_values)
+            'runbot.odoo_conf_template', values=conf_values,
+            context=self.env.context)
         open(self.env_dir+'/odoo.conf', 'w+').write(odoo_config)
 
         cmd = [
@@ -264,7 +265,8 @@ class Build(models.Model):
         }
         nginx_config = self.pool['ir.ui.view'].render(
             self.env.cr, self.env.user.id,
-            'runbot.nginx_template', values=nginx_values)
+            'runbot.nginx_template', values=nginx_values,
+            context=self.env.context)
         open(os.path.join(self.repo_id.root(),
                           'nginx/%s.conf' % self.short_name),
              'w+').write(nginx_config)
