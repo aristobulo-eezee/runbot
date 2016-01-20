@@ -187,8 +187,8 @@ class Build(models.Model):
             self.env.cr.commit()
             # If process ends with signal different than 0 then raise error
             raise UserError(
-                    _('Installation process failed for build: %s' %
-                      self.short_name))
+                _('Installation process failed for build: %s' %
+                  self.short_name))
         return True
 
     @api.multi
