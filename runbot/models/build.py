@@ -405,6 +405,7 @@ class Build(models.Model):
             'args': '(%s, )' % build_id,
             'user_id': self.env.user.id,
         })
+        build.state = 'scheduled'
         _logger.info('Scheduled: %s' % cron.name)
 
     def unlink(self, cr, uid, ids, context=None):
