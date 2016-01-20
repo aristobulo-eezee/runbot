@@ -237,7 +237,7 @@
                                     <textarea class="form-control" rows="20" disabled="true"><t t-esc="build.get_log('server')"/></textarea>
                                 </div>
                                 <div class="tab-pane" id="install">
-                                    <textarea class="form-control" rows="20" readonly="true"><t t-esc="build.get_log('install').strip()"/></textarea>
+                                    <textarea class="form-control" rows="20" disabled="true"><t t-esc="build.get_log('install').strip()"/></textarea>
                                 </div>
                             </div>
                         </div>
