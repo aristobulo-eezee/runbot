@@ -114,7 +114,7 @@ class RunbotController(http.Controller):
         except Exception as e:
             _logger.error(e)
 
-        return request.redirect('/runbot/build/%s' % slug(build.repo_id))
+        return request.redirect('/runbot/build/%s' % slug(build))
 
     @http.route('/runbot/build/<model("runbot.build"):build>/rebuild',
                 type='http', auth="public", website=True)
@@ -130,7 +130,7 @@ class RunbotController(http.Controller):
             env['runbot.build'].schedule(build.id)
         except Exception as e:
             _logger.error(e)
-        return request.redirect('/runbot/build/%s' % slug(build.repo_id))
+        return request.redirect('/runbot/build/%s' % slug(build))
 
     @http.route('/runbot/build/<model("runbot.build"):build>/kill',
                 type='http', auth="public", website=True)
@@ -139,7 +139,7 @@ class RunbotController(http.Controller):
             build.sudo().kill()
         except Exception as e:
             _logger.error(e)
-        return request.redirect('/runbot/build/%s' % slug(build.repo_id))
+        return request.redirect('/runbot/build/%s' % slug(build))
 
     @http.route('/runbot/build/<model("runbot.build"):build>',
                 type='http', auth="public", website=True)
