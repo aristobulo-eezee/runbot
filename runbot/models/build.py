@@ -18,6 +18,7 @@
 #
 #
 from openerp import models, fields, api, _
+from openerp.exceptions import UserError
 
 import logging
 import subprocess
@@ -179,8 +180,15 @@ class Build(models.Model):
             odoo_server.wait()
 
         odoo_server = subprocess.Popen(cmd, env=venv)
-        odoo_server.wait()
-
+        if odoo_server.wait() != 0:
+            self.write({
+                'state': 'failed',
+                'last_state_since': fields.Datetime.now(), })
+            self.env.cr.commit()
+            # If process ends with signal different than 0 then raise error
+            raise UserError(
+                    _('Installation process failed for build: %s' %
+                      self.short_name))
         return True
 
     @api.multi
