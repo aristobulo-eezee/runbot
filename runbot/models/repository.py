@@ -166,7 +166,9 @@ class Repository(models.Model):
         self.ensure_one()
         _logger.info('Updating branches.')
         branches = [b.ref_name for b in self.branch_ids]
+        remote_branches = []
         for head in heads:
+            remote_branches.append(head[1])
             if 'refs/heads/HEAD' not in head[1] and head[1] not in branches:
                 values = {
                     'repo_id': self.id,
@@ -179,7 +181,6 @@ class Repository(models.Model):
 
         # Delete branches not present in remote
         _logger.info('Cleaning branches...')
-        remote_branches = [head[1] for head in heads]
         for branch in self.branch_ids:
             if branch.ref_name not in remote_branches:
                 branch.unlink()
