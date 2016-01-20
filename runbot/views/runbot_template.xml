@@ -200,7 +200,7 @@
                                             </ul>
                                         </t>
                                         <t t-if="build.state == 'killed'">
-                                            <a class="btn btn-default btn-flat" t-attf-href="#{'/runbot/build/%s/start' % slug(build)}" target="_self" role="button">OPEN</a>
+                                            <a class="btn btn-default btn-flat" t-attf-href="#{'/runbot/build/%s/start' % slug(build)}" target="_self" role="button">RESTART</a>
                                             <ul class="dropdown-menu">
                                                 <li><a t-attf-href="#{'/runbot/build/%s/rebuild' % slug(build)}" target="_self"><i class="fa fa-refresh"></i> REBUILD</a></li>
                                             </ul>
