@@ -377,16 +377,6 @@ class Build(models.Model):
         s.close()
         return port
 
-    @api.multi
-    def log(self, n=50):
-        """
-        Get build logfile
-        :param n: number of lines
-        :return: last n lines of logfile
-        """
-        self.ensure_one()
-        return
-
     @api.model
     def run(self, build_id):
         build = self.browse(build_id)
@@ -415,6 +405,7 @@ class Build(models.Model):
             'args': '(%s, )' % build_id,
             'user_id': self.env.user.id,
         })
+        build.state = 'scheduled'
         _logger.info('Scheduled: %s' % cron.name)
 
     def unlink(self, cr, uid, ids, context=None):

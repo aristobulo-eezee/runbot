@@ -37,3 +37,10 @@
     color: #E0E0E0;
     padding: 7px;
 }
+
+.form-control[disabled], .form-control[readonly], fieldset[disabled] .form-control {
+    font-family: "Lucida Console", Monaco, monospace;
+    font-size: 12px;
+    background-color: #333 !important;
+    color: #fff !important;
+}

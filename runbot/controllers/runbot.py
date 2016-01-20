@@ -117,6 +117,23 @@ class RunbotController(http.Controller):
 
         return request.redirect('/runbot/repo/%s' % slug(build.repo_id))
 
+    @http.route('/runbot/build/<model("runbot.build"):build>/rebuild',
+                type='http', auth="public", website=True)
+    def rebuild_build(self, build):
+        """
+        Set current build to be rebuilt, as we use cron jobs to handle build
+        queues the build is sent to the scheduler
+        :param build:
+        :return:
+        """
+        env = request.env
+        try:
+            env['runbot.build'].schedule(build.id)
+        except Exception as e:
+            _logger.error(e)
+
+        return request.redirect('/runbot/repo/%s' % slug(build.repo_id))
+
     @http.route('/runbot/build/<model("runbot.build"):build>',
                 type='http', auth="public", website=True)
     def build_details(self, build):
@@ -138,6 +155,11 @@ class RunbotController(http.Controller):
                 {
                     'string': build.repo_id.name,
                     'url': '/runbot/repo/%s' % slug(build.repo_id),
+                    'active': False,
+                },
+                {
+                    'string': 'Build: %s' % build.short_name,
+                    'url': '/runbot/build/%s' % slug(build),
                     'active': True,
                 },
             ],
