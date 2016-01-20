@@ -131,7 +131,15 @@ class RunbotController(http.Controller):
             env['runbot.build'].schedule(build.id)
         except Exception as e:
             _logger.error(e)
+        return request.redirect('/runbot/repo/%s' % slug(build.repo_id))
 
+    @http.route('/runbot/build/<model("runbot.build"):build>/kill',
+                type='http', auth="public", website=True)
+    def kill_build(self, build):
+        try:
+            build.sudo().kill()
+        except Exception as e:
+            _logger.error(e)
         return request.redirect('/runbot/repo/%s' % slug(build.repo_id))
 
     @http.route('/runbot/build/<model("runbot.build"):build>',
