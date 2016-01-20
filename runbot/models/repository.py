@@ -177,6 +177,13 @@ class Repository(models.Model):
                 _logger.info('Added new branch: %s to %s.' % (
                     head[1], self.name))
 
+        # Delete branches not present in remote
+        _logger.info('Cleaning branches...')
+        remote_branches = [head[1] for head in heads]
+        for branch in self.branch_ids:
+            if branch.ref_name not in remote_branches:
+                branch.unlink()
+
     @api.multi
     def update_tags(self, tags=[]):
         """
@@ -195,6 +202,12 @@ class Repository(models.Model):
                     'name': tag})
                 _logger.info('Added new tag: %s to %s.' % (
                     tag, self.name))
+
+        # Delete tags not present in remote
+        _logger.info('Cleaning tags...')
+        for tag in self.tag_ids:
+            if tag.name not in tags:
+                tag.unlink()
 
     @api.multi
     def repo_publish_button(self):
