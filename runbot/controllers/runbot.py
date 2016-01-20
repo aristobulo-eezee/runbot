@@ -127,7 +127,7 @@ class RunbotController(http.Controller):
         """
         env = request.env
         try:
-            env['runbot.build'].schedule(build.id)
+            env['runbot.build'].sudo().schedule(build.id)
         except Exception as e:
             _logger.error(e)
         return request.redirect('/runbot/build/%s' % slug(build))
