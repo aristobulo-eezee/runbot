@@ -175,7 +175,7 @@
         <template id="runbot.build_details" name="Build details">
             <t t-call='runbot.layout'>
                 <div class="row">
-                    <div class="col-xs-3">
+                    <div class="col-md-3">
                         <!--Build info-->
                         <div t-attf-class="box box-#{build.state == 'running' and 'primary' or build.state in ['scheduled', 'installing'] and 'warning' or 'default'}">
                             <div class="box-body box-profile">
@@ -222,7 +222,7 @@
                             <div class="box-body"></div>
                         </div>
                     </div>
-                    <div class="col-xs-9">
+                    <div class="col-md-9">
                         <div class="nav-tabs-custom">
                             <ul class="nav nav-tabs">
                                 <li class="active">
