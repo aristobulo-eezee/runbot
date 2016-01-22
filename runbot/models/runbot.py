@@ -19,6 +19,8 @@
 #
 from openerp import models, api
 
+import psutil
+
 
 class Runbot(models.Model):
     _auto = False
@@ -44,3 +46,10 @@ class Runbot(models.Model):
                     key=lambda r: r.id, reverse=True)[max_running_builds:]:
                 build.kill()
                 build.clean()
+
+    @api.model
+    def check_running_builds(self):
+        builds = self.env['runbot.build'].search([('state', '=', 'running')])
+        for b in builds:
+            if not psutil.pid_exists(b.pid) or not b.pid:
+                b.kill()

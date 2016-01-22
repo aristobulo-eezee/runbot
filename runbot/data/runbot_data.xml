@@ -48,5 +48,16 @@
             <field name="interval_number">1</field>
             <field name="interval_type">hours</field>
         </record>
+        <record id="cron_check_running_builds" model="ir.cron">
+            <field name="name">Check running builds</field>
+            <field name="priority" eval="int(10)"/>
+            <field name="numbercall" eval="int(-1)"/>
+            <field name="model">runbot.runbot</field>
+            <field name="function">check_running_builds</field>
+            <field name="active" eval="True"/>
+            <field name="interval_number">3</field>
+            <field name="interval_type">minutes</field>
+            <field name="doall" eval="True"/>
+        </record>
     </data>
 </openerp>
